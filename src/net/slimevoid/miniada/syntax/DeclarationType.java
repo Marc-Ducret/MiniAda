@@ -12,11 +12,9 @@ import net.slimevoid.miniada.token.Keyword.KeywordType;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
 import net.slimevoid.miniada.typing.Environment;
 import net.slimevoid.miniada.typing.Type;
-import net.slimevoid.miniada.typing.TypeDef;
-import net.slimevoid.miniada.typing.TypeDefAccess;
-import net.slimevoid.miniada.typing.TypeDefRecord;
-import net.slimevoid.miniada.typing.TypeDefRecord.Member;
 import net.slimevoid.miniada.typing.TypeException;
+import net.slimevoid.miniada.typing.TypeRecord;
+import net.slimevoid.miniada.typing.TypeRecord.Member;
 
 public class DeclarationType extends Declaration {
 
@@ -76,7 +74,7 @@ public class DeclarationType extends Declaration {
 	
 	public static abstract class TypeDefinition {
 		
-		public abstract TypeDef buildDef(Environment env, Type type)
+		public abstract Type buildDef(Environment env, Type type)
 				throws TypeException;
 	}
 	
@@ -88,9 +86,9 @@ public class DeclarationType extends Declaration {
 		}
 		
 		@Override
-		public TypeDef buildDef(Environment env, Type type) 
+		public Type buildDef(Environment env, Type type) 
 				throws TypeException {
-			return new TypeDefAccess(env.getType(id));
+			return env.getAccessForType(id);
 		}
 		
 		@Override
@@ -107,7 +105,7 @@ public class DeclarationType extends Declaration {
 		}
 		
 		@Override
-		public TypeDef buildDef(Environment env, Type type)
+		public Type buildDef(Environment env, Type type)
 				throws TypeException {
 			List<Member> mems = new ArrayList<>();
 			for(Fields f : fields)
@@ -123,7 +121,7 @@ public class DeclarationType extends Declaration {
 							"modifier");
 					mems.add(new Member(id.name, t));
 				}
-			return new TypeDefRecord(mems.toArray(new Member[mems.size()]));
+			return new TypeRecord(mems.toArray(new Member[mems.size()]));
 		}
 		
 		@Override

@@ -1,14 +1,16 @@
 package net.slimevoid.miniada.typing;
 
+import net.slimevoid.miniada.interpert.Value;
+
 public class TypeDefined extends Type {
 	
-	private TypeDef def;
+	private Type def;
 	
 	protected TypeDefined(String name) {
 		super(name);
 	}
 	
-	public TypeDef getDefinition() {
+	public Type getDefinition() {
 		assert(isDefined());
 		return def;
 	}
@@ -17,8 +19,13 @@ public class TypeDefined extends Type {
 		return def != null;
 	}
 	
-	protected void define(TypeDef def) {
+	protected void define(Type def) {
 		assert(!isDefined());
 		this.def = def;
+	}
+
+	@Override
+	public Value defaultValue() {
+		return def.defaultValue();
 	}
 }

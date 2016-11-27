@@ -2,11 +2,17 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
+import net.slimevoid.miniada.interpert.Value;
+import net.slimevoid.miniada.interpert.ValueAccess;
 import net.slimevoid.miniada.token.Symbol;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
 import net.slimevoid.miniada.typing.Environment;
 import net.slimevoid.miniada.typing.Type;
+import net.slimevoid.miniada.typing.TypeAccess;
+import net.slimevoid.miniada.typing.TypeDefined;
 import net.slimevoid.miniada.typing.TypeException;
+import net.slimevoid.miniada.typing.TypeRecord;
 
 public class InstructionAssign extends Instruction {
 	
@@ -61,8 +67,21 @@ public class InstructionAssign extends Instruction {
 	}
 	
 	@Override
-	public boolean execute(Environment env) {
-		env.setValue(access.id, expr.value(env)); //TODO records
+	public boolean execute(Scope s) {
+		if(access.from == null)
+			s.updateValue(access.id, expr.value(s));
+		else {
+			TypeDefined t = (TypeDefined) access.from.getComputedType();
+			if(t.getDefinition() instanceof TypeAccess) {
+				t = (TypeDefined) ((TypeAccess)t.getDefinition()).type;
+			}
+			TypeRecord r = ((TypeRecord)t.getDefinition());
+			Value v = access.from.value(s);
+			if(v instanceof ValueAccess)
+				v = ((ValueAccess) v).getVar();
+			v.toRecord().setVal(r.getMemberNumber(access.id.name), 
+								expr.value(s));
+		}
 		return false;
 	}
 }

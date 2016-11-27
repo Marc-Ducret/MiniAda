@@ -2,6 +2,9 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
+import net.slimevoid.miniada.interpert.Value;
+import net.slimevoid.miniada.interpert.ValuePrimitive;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
 import net.slimevoid.miniada.token.Symbol;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
@@ -83,7 +86,7 @@ public abstract class Expression extends SyntaxNode implements Typeable {
 	}
 	
 	public boolean isAlterable() {
-		return false;
+		return type.isAccess();
 	}
 	
 	public Type getType(Environment env) throws TypeException {
@@ -91,13 +94,26 @@ public abstract class Expression extends SyntaxNode implements Typeable {
 		return type;
 	}
 	
-	public abstract Object value(Environment env);
-	
-	public boolean valueBool(Environment env) {
-		return (boolean) value(env);
+	public Type getComputedType() {
+		return type;
 	}
 	
-	public int valueInt(Environment env) {
-		return (int) value(env);
+	/**
+	 * This or valuePrim must be overidden by sub classes
+	 */
+	public Value value(Scope s) {
+		return new ValuePrimitive(valuePrim(s));
+	}
+	
+	public Object valuePrim(Scope s) {
+		return ((ValuePrimitive)value(s)).getVal();
+	}
+	
+	public boolean valueBool(Scope s) {
+		return (boolean) valuePrim(s);
+	}
+	
+	public int valueInt(Scope s) {
+		return (int) valuePrim(s);
 	}
 }

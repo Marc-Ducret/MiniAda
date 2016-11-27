@@ -2,6 +2,8 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
+import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
 import net.slimevoid.miniada.typing.Environment;
 import net.slimevoid.miniada.typing.Type;
@@ -55,11 +57,11 @@ public class InstructionCall extends Instruction {
 	}
 
 	@Override
-	public boolean execute(Environment env) {
-		Object[] args = new Object[proc.pars.length];
+	public boolean execute(Scope s) {
+		Value[] args = new Value[proc.pars.length];
 		for(int i = 0; i < proc.pars.length; i ++)
-			args[i] = call.exprs[i].value(env);
-		proc.execute(args);
+			args[i] = call.exprs[i].value(s);
+		proc.execute(s, args);
 		return false;
 	}
 }

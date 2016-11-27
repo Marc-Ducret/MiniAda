@@ -3,23 +3,43 @@ package net.slimevoid.miniada.typing;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TypePrimitive extends Type {
+import net.slimevoid.miniada.interpert.Value;
+import net.slimevoid.miniada.interpert.ValueAccess;
+import net.slimevoid.miniada.interpert.ValuePrimitive;
+
+public abstract class TypePrimitive extends Type {
 	
 	private static final Map<String, TypePrimitive> prims = new HashMap<>();
 
-	public static final TypePrimitive INTEGER = new TypePrimitive("Integer"),
-									  BOOLEAN = new TypePrimitive("Boolean"),
-									CHARACTER = new TypePrimitive("Character");
+	public static final TypePrimitive INTEGER = new TypePrimitive("Integer"){
+		public Value defaultValue() {
+			return new ValuePrimitive(0);
+		}
+	},
+									  BOOLEAN = new TypePrimitive("Boolean"){
+		public Value defaultValue() {
+			return new ValuePrimitive(false);
+		}
+	},
+									CHARACTER = new TypePrimitive("Character") {
+		public Value defaultValue() {
+			return new ValuePrimitive(' ');
+		}
+	};
 	
 	public static final TypePrimitive NULL = new TypePrimitive("@typenull") {
 		public boolean canBeCastedInto(Type t) {
 			if(t == this) return true;
 			if(t instanceof TypeAccess) return true;
 			if(t instanceof TypeDefined &&
-					((TypeDefined) t).getDefinition() instanceof TypeDefAccess)
+					((TypeDefined) t).getDefinition() instanceof TypeAccess)
 				return true;
 			return false;
 		}
+		
+		public Value defaultValue() {
+			return new ValueAccess(null);
+		};
 	};
 	
 	private TypePrimitive(String name) {

@@ -1,21 +1,28 @@
 package net.slimevoid.miniada;
 
+import java.io.PrintStream;
+
+import net.slimevoid.miniada.interpert.Scope;
+import net.slimevoid.miniada.interpert.Value;
+import net.slimevoid.miniada.interpert.ValuePrimitive;
 import net.slimevoid.miniada.syntax.NativeFunction;
 import net.slimevoid.miniada.syntax.NativeProcedure;
 import net.slimevoid.miniada.typing.TypePrimitive;
 
-public class Librairy {
+public class Library {
 	
 	public static final NativeProcedure PUT = buildPut();
 	public static final NativeProcedure NEW_LINE = buildNewLine();
 	public static final NativeFunction CHARACTER_VAL = buildCharVal();
 	
+	private static PrintStream out = System.out;
+	
 	private static NativeProcedure buildPut() {
 		NativeProcedure put = new NativeProcedure("Put", 
 				                      TypePrimitive.CHARACTER) {
 			@Override
-			public void execute(Object...args) {
-				System.out.print((char) args[0]);
+			public void execute(Scope s, Value...args) {
+				out.print(args[0].toChar());
 			}
 		};
 		return put;
@@ -25,8 +32,8 @@ public class Librairy {
 		NativeProcedure newline = new NativeProcedure("New_Line") {
 			
 			@Override
-			public void execute(Object...args) {
-				System.out.println();
+			public void execute(Scope s, Value...args) {
+				out.println();
 			}
 		};
 		return newline;
@@ -37,9 +44,13 @@ public class Librairy {
 				TypePrimitive.INTEGER) {
 			
 			@Override
-			public Object execute(Object[] args) {
-				return (char) (int) args[0];
+			public Value execute(Scope s, Value...args) {
+				return new ValuePrimitive((char) args[0].toInt());
 			}
 		};
+	}
+	
+	protected static void setOutput(PrintStream out) {
+		Library.out = out;
 	}
 }

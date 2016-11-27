@@ -1,10 +1,14 @@
 package net.slimevoid.miniada;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.syntax.MatchException;
 import net.slimevoid.miniada.syntax.SourceFile;
 import net.slimevoid.miniada.token.EOF;
@@ -35,13 +39,17 @@ public class Compiler {
 		long startTime = System.nanoTime();
 		runTests(new File("tests/syntax/"), 1);
 		runTests(new File("tests/typing/"), 2);
-		runTests(new File("tests/exec/"), 2);
+		runTests(new File("tests/exec/"), 3);
 		runTests(new File("tests/exec-fail/"), 2);
 		long elapsed = (System.nanoTime() - startTime)/1000000;
 		System.out.println("Testing ended in "+elapsed+" ms");
 	}
 	
 	public boolean compile(File file, int maxPass, int verbose) 
+			throws IOException {
+		return compile(file, maxPass, verbose, System.out);
+	}
+	public boolean compile(File file, int maxPass, int verbose, PrintStream out) 
 			throws IOException {
 		boolean debug = verbose > 1;
 		boolean silent = verbose < 1;
@@ -54,8 +62,17 @@ public class Compiler {
 					if(maxPass >= PASS_TYP) {
 						typeAnalysis(src, debug);
 						if(maxPass >= PASS_EXE) {
-							System.out.println("== EXEC ==");
-							src.dproc.execute();
+							if(debug) System.out.println("== EXEC ==");
+							try {
+								Library.setOutput(out);
+								src.dproc.execute(new Scope());
+							} catch (Exception e) {
+								System.err.println(
+									 "File \""+file.getName()+"\n"
+									+"Runtime error\n"
+									+e);
+								e.printStackTrace();
+							}
 						}
 					}
 				}
@@ -85,11 +102,43 @@ public class Compiler {
 		for(File f : testFolder.listFiles()) { 
 			if(!f.getName().endsWith(".adb")) continue;
 			ct ++;
-			if(compile(f, pass, 0)) ok ++;
-			else {
-				System.out.println("Failed test "+f.getName());
-				compile(f, pass, 1);
+			ByteArrayOutputStream buff = new ByteArrayOutputStream();
+			PrintStream out = new PrintStream(buff);
+			if(compile(f, pass, 0, out)) {
+				boolean success = true;
+				String res = new String(buff.toByteArray(), 
+						StandardCharsets.UTF_8);
+				res = res.replaceAll("\r\n", "\n");
+				String expected = "";
+				if(pass >= PASS_EXE) {
+					String n = f.getName();
+					FileReader read = new FileReader(
+							new File(testFolder, n.substring(0, n.length()-3)+"out"));
+					int r;
+					int i = 0;
+					while((r = read.read()) >= 0) {
+						expected += (char) r;
+						if(i >= res.length())
+							success = false;
+						else if(res.charAt(i) != (char)r)
+							success = false;
+						i++;
+					}
+					read.close();
+				}
+				if(success) ok++;
+				else {
+					System.out.println("Failed execution "+f.getName());
+					System.out.println("Print:");
+					System.out.println(res);
+					System.out.println("Expected:");
+					System.out.println(expected);
+				}
+			} else {
+				System.out.println("Failed compilation "+f.getName());
+				compile(f, pass, 1, out);
 			}
+			buff.close();
 		}
 		File good = new File(testFolder, "good");
 		if(good.exists())
@@ -148,9 +197,9 @@ public class Compiler {
 			throws TypeException {
 		if(debug) System.out.println("== TYPE ==");
 		Environment env = new Environment(null);
-		env.registerNativeProcedure(Librairy.PUT);
-		env.registerNativeProcedure(Librairy.NEW_LINE);
-		env.registerNativeFunction(Librairy.CHARACTER_VAL);
+		env.registerNativeProcedure(Library.PUT);
+		env.registerNativeProcedure(Library.NEW_LINE);
+		env.registerNativeFunction(Library.CHARACTER_VAL);
 		src.dproc.typeDeclaration(env);
 	}
 	

@@ -1,21 +1,19 @@
 package net.slimevoid.miniada.syntax;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Identifier;
 import net.slimevoid.miniada.token.Keyword;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
 import net.slimevoid.miniada.token.Symbol;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
+import net.slimevoid.miniada.token.Yytoken;
 import net.slimevoid.miniada.typing.Environment;
 import net.slimevoid.miniada.typing.SubEnvironment;
 import net.slimevoid.miniada.typing.Type;
 import net.slimevoid.miniada.typing.TypeException;
 import net.slimevoid.miniada.typing.TypePrimitive;
-import net.slimevoid.miniada.token.Yytoken;
 
 public class InstructionFor extends Instruction {
 	
@@ -95,15 +93,14 @@ public class InstructionFor extends Instruction {
 	}
 	
 	@Override
-	public boolean execute(Environment env) {
+	public boolean execute(Scope s) {
 		int di = reverse ? -1 : 1;
-		int i = from.valueInt(env);
-		int bound = to.valueInt(env);
-		int min = min(i, bound);
-		int max = max(i, bound);
+		int min = from.valueInt(s);
+		int max =   to.valueInt(s);
+		int i = reverse ? max : min;
 		while(i >= min && i <= max) {
-			env.setValue(var, i);
-			if(block.execute(env)) return true;
+			s.setValuePrim(var, i);
+			if(block.execute(s)) return true;
 			i += di;
 		}
 		return false;

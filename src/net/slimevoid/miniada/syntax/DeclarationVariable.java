@@ -5,10 +5,12 @@ import java.util.List;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Identifier;
 import net.slimevoid.miniada.token.Symbol;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
 import net.slimevoid.miniada.typing.Environment;
+import net.slimevoid.miniada.typing.Type;
 import net.slimevoid.miniada.typing.TypeException;
 
 public class DeclarationVariable extends Declaration {
@@ -54,16 +56,25 @@ public class DeclarationVariable extends Declaration {
 	
 	@Override
 	public void typeDeclaration(Environment env) throws TypeException {
-		env.checkDefinitions(this);
+		Type t = type.computeType(env);
 		for(Identifier id : ids)
-			env.registerVar(id, type.computeType(env));
+			env.registerVar(id, t);
+		if(init != null) {
+			Type tI = init.computeType(env);
+			if(!tI.canBeCastedInto(t))
+				throw new TypeException(init, "Expected type "+t
+										+" while expression has type "+tI);
+		}
 	}
 	
 	@Override
-	public void init(Environment env) {
+	public void init(Scope s) {
 		if(init != null)
 			for(Identifier id : ids) // TODO test init on all?
-				env.setValue(id, init.value(env));
+				s.setValue(id, init.value(s));
+		else
+			for(Identifier id : ids) // TODO test init on all?
+				s.setValue(id, type.type.defaultValue());
 	}
 	
 	@Override

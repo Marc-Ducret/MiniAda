@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Keyword;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
@@ -124,12 +125,12 @@ public class InstructionIf extends Instruction {
 	}
 
 	@Override
-	public boolean execute(Environment env) {
+	public boolean execute(Scope s) {
 		for(int i = 0; i < conds.length; i ++) {
 			Expression cond = conds[i];
 			InstructionBlock block = blocks[i];
-			if(cond == null || cond.valueBool(env))
-				return block.execute(env);
+			if(cond == null || cond.valueBool(s))
+				return block.execute(s);
 		}
 		return false;
 	}

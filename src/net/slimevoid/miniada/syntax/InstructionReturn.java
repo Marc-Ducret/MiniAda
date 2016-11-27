@@ -2,13 +2,14 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Keyword;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
 import net.slimevoid.miniada.token.Symbol;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
+import net.slimevoid.miniada.token.Yytoken;
 import net.slimevoid.miniada.typing.Environment;
 import net.slimevoid.miniada.typing.TypeException;
-import net.slimevoid.miniada.token.Yytoken;
 
 public class InstructionReturn extends Instruction {
 	
@@ -61,8 +62,8 @@ public class InstructionReturn extends Instruction {
 	}
 
 	@Override
-	public boolean execute(Environment env) {
-		env.setReturn(ret.value(env));
+	public boolean execute(Scope s) {
+		if(ret != null) s.setReturn(ret.value(s));
 		return true;
 	}
 }

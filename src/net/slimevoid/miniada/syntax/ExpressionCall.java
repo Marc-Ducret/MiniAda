@@ -1,6 +1,8 @@
 package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
+import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.typing.Environment;
 import net.slimevoid.miniada.typing.Type;
 import net.slimevoid.miniada.typing.TypeException;
@@ -49,10 +51,10 @@ public class ExpressionCall extends Expression {
 	}
 
 	@Override
-	public Object value(Environment env) {
-		Object[] args = new Object[call.exprs.length];
+	public Value value(Scope s) {
+		Value[] args = new Value[call.exprs.length];
 		for(int i = 0; i < args.length; i++)
-			args[i] = call.exprs[i].value(env);
-		return func.execute(args);
+			args[i] = call.exprs[i].value(s);
+		return func.execute(s, args);
 	}
 }

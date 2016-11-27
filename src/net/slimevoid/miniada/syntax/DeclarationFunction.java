@@ -5,6 +5,9 @@ import java.util.List;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
+import net.slimevoid.miniada.interpert.SubScope;
+import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.syntax.Instruction.InstructionBlock;
 import net.slimevoid.miniada.token.Identifier;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
@@ -90,13 +93,14 @@ public class DeclarationFunction extends Declaration {
 			throw new TypeException(this, "Missing return");
 	}
 	
-	public Object execute(Object[] args) {
+	public Value execute(Scope s, Value...args) {
+		SubScope localS = new SubScope(s);
 		for(int i = 0; i < pars.length; i++) {
-			localEnv.setValue(pars[i].name, args[i]);
+			localS.setValue(pars[i].name, args[i]);
 		}
-		for(Declaration decl : decls) decl.init(localEnv);
-		instrs.execute(localEnv);
-		return localEnv.ret;
+		for(Declaration decl : decls) decl.init(localS);
+		instrs.execute(localS);
+		return localS.ret;
 	}
 	
 	@Override

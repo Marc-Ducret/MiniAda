@@ -1,6 +1,7 @@
 package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
 import net.slimevoid.miniada.typing.Environment;
 import net.slimevoid.miniada.typing.TypeException;
@@ -20,5 +21,5 @@ public abstract class Declaration extends SyntaxNode {
 	
 	public abstract void typeDeclaration(Environment env) throws TypeException;
 
-	public void init(Environment env) {}
+	public void init(Scope s) {}
 }

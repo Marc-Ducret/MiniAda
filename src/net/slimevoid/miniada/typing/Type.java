@@ -1,5 +1,7 @@
 package net.slimevoid.miniada.typing;
 
+import net.slimevoid.miniada.interpert.Value;
+
 public abstract class Type {
 
 	protected String name;
@@ -19,5 +21,13 @@ public abstract class Type {
 	
 	public boolean canBeCastedInto(Type t) {
 		return t == this;
+	}
+	
+	public abstract Value defaultValue();
+
+	public boolean isAccess() {
+		return this instanceof TypeAccess ||
+				(this instanceof TypeDefined && 
+				((TypeDefined)this).getDefinition() instanceof TypeAccess);
 	}
 }

@@ -2,6 +2,7 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Keyword;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
@@ -63,9 +64,9 @@ public class InstructionWhile extends Instruction {
 	}
 
 	@Override
-	public boolean execute(Environment env) {
-		while(cond.valueBool(env)) {
-			if(block.execute(env)) return true;
+	public boolean execute(Scope s) {
+		while(cond.valueBool(s)) {
+			if(block.execute(s)) return true;
 		}
 		return false;
 	}

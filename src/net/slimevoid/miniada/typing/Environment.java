@@ -19,9 +19,6 @@ public class Environment {
 	private Map<String, DeclarationProcedure> procedures = new HashMap<>();
 	private Map<String, Object> usedNames = new HashMap<>();
 	
-	private Map<String, Object> vars = new HashMap<>();
-	public Object ret;
-	
 	public final Type expectedReturn;
 	
 	public Environment(Type expectedReturn) {
@@ -66,7 +63,7 @@ public class Environment {
 		types.put(id.name.toLowerCase(), new TypeDefined(id.name));
 	}
 	
-	public void defineType(Identifier id, TypeDef def) throws TypeException {
+	public void defineType(Identifier id, Type def) throws TypeException {
 		if(isTypeDefined(id))
 			throw new TypeException(id, "type "+id+" is already defined");
 		useName(id);
@@ -141,32 +138,4 @@ public class Environment {
 	public void restricAlteration(Identifier id) {
 		restrictAlter.put(id.name.toLowerCase(), true);
 	}
-	
-	public void setValue(Identifier id, Object value) {
-		vars.put(id.name.toLowerCase(), value);
-	}
-	
-	public Object getValue(Identifier id) {
-		return vars.get(id.name.toLowerCase());
-	}
-	
-	public int getValueInt(Identifier id) {
-		return (int) getValue(id);
-	}
-	
-	public char getValueChar(Identifier id) {
-		return (char) getValue(id);
-	}
-	
-	public boolean getValueBool(Identifier id) {
-		return (boolean) getValue(id);
-	}
-
-	public void setReturn(Object value) {
-		this.ret = value;
-	}
-
-//	public boolean getValueRecord(Identifier id) { //TODO do
-//		return (boolean) vars.get(id.name.toLowerCase());
-//	}
 }

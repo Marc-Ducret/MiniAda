@@ -4,21 +4,21 @@ import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.token.Identifier;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
+import net.slimevoid.miniada.token.Yytoken;
 import net.slimevoid.miniada.typing.Environment;
 import net.slimevoid.miniada.typing.Type;
 import net.slimevoid.miniada.typing.TypeAccess;
-import net.slimevoid.miniada.typing.TypeDef;
-import net.slimevoid.miniada.typing.TypeDefAccess;
-import net.slimevoid.miniada.typing.TypeDefRecord;
 import net.slimevoid.miniada.typing.TypeDefined;
 import net.slimevoid.miniada.typing.TypeException;
+import net.slimevoid.miniada.typing.TypeRecord;
 import net.slimevoid.miniada.typing.Typeable;
-import net.slimevoid.miniada.token.Yytoken;
 
 public class Access extends SyntaxNode implements Typeable {
 	
 	public final Identifier id;
 	public final Expression from;
+	
+	public DeclarationFunction func;
 	
 	public boolean alterable;
 	
@@ -59,31 +59,26 @@ public class Access extends SyntaxNode implements Typeable {
 	public Type computeType(Environment env) throws TypeException {
 		alterable = false;
 		if(from == null) {
-			alterable = env.isAlterable(id);
 			try {
-				return env.getFunction(id).retType;
+				func = env.getFunction(id);
+				alterable = func.retType.isAccess();
+				return func.retType;
 			} catch(TypeException e) {}
+			alterable = env.isAlterable(id) || env.getVarType(id).isAccess();
 			return env.getVarType(id);
 		}
 		Type t = from.getType(env);
-		if(t instanceof TypeAccess) { //TODO refactor access?? 
-			t = ((TypeAccess) t).type;
-			alterable = true;
-		}
-		if(!(t instanceof TypeDefined)) 
+		while(true)
+			if(t instanceof TypeDefined)
+				t = ((TypeDefined) t).getDefinition();
+			else if(t instanceof TypeAccess)
+				t = ((TypeAccess) t).type;
+			else break;
+		if(!(t instanceof TypeRecord))
 			throw new TypeException(from, 
-					"Expected record or access to type record");
-		TypeDef def = (TypeDef) ((TypeDefined)t).getDefinition();
-		if(def instanceof TypeDefAccess) {
-			alterable = true;
-			TypeDefAccess acc = (TypeDefAccess) def;
-			if(acc.type instanceof TypeDefined)
-				def = ((TypeDefined)acc.type).getDefinition();
-		}
-		if(!(def instanceof TypeDefRecord))
-			throw new TypeException(from, 
-					"Expected record or access to type record");
-		TypeDefRecord rec = (TypeDefRecord) def;
+					"Expected record or access to record");
+		TypeRecord rec = (TypeRecord) t;
+		alterable = from.isAlterable();
 		if(!rec.hasMember(id.name))
 			throw new TypeException(id, t.getName()+" has no field "+id);
 		return rec.getMemberType(id.name);

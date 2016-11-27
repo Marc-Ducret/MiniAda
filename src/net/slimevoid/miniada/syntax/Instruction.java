@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Keyword;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
@@ -52,7 +53,7 @@ public abstract class Instruction extends SyntaxNode {
 	 * @param env
 	 * @return true if instruction returned
 	 */
-	public abstract boolean execute(Environment env);
+	public abstract boolean execute(Scope s);
 	
 	public static InstructionBlock matchInstructionBlock(TokenList toks, 
 			KeywordType...stopWords) 
@@ -104,9 +105,9 @@ public abstract class Instruction extends SyntaxNode {
 		}
 
 		@Override
-		public boolean execute(Environment env) {
+		public boolean execute(Scope localS) {
 			for(Instruction i : instrs) {
-				if(i.execute(env)) return true;
+				if(i.execute(localS)) return true;
 			}
 			return false;
 		}

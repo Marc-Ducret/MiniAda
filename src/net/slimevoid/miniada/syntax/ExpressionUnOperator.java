@@ -1,6 +1,7 @@
 package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.typing.Environment;
 import net.slimevoid.miniada.typing.Type;
 import net.slimevoid.miniada.typing.TypeException;
@@ -40,12 +41,12 @@ public class ExpressionUnOperator extends Expression {
 	}
 
 	@Override
-	public Object value(Environment env) {
+	public Object valuePrim(Scope s) {
 		switch(op.type) {
 		case MINUS:
-			return -e.valueInt(env);
+			return -e.valueInt(s);
 		case NOT:
-			return !e.valueBool(env);
+			return !e.valueBool(s);
 		default:
 			return null;
 		}

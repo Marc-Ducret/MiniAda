@@ -1,6 +1,7 @@
 package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.typing.Environment;
 import net.slimevoid.miniada.typing.Type;
 import net.slimevoid.miniada.typing.TypeException;
@@ -51,38 +52,38 @@ public class ExpressionBinOperator extends Expression {
 	}
 
 	@Override
-	public Object value(Environment env) {
+	public Object valuePrim(Scope s) {
 		switch(op.type) {
 		case AND:
-			return eL.valueBool(env) && eR.valueBool(env);
+			return eL.valueBool(s) && eR.valueBool(s);
 		case AND_THEN:
-			return eL.valueBool(env) & eR.valueBool(env);
+			return eL.valueBool(s) & eR.valueBool(s);
 		case DIVIDE:
-			return eL.valueInt(env) / eR.valueInt(env);
+			return eL.valueInt(s) / eR.valueInt(s);
 		case EQ:
-			return eL.value(env) == eR.value(env);
+			return eL.value(s).eq(eR.value(s));
 		case GE:
-			return eL.valueInt(env) >= eR.valueInt(env);
+			return eL.valueInt(s) >= eR.valueInt(s);
 		case GT:
-			return eL.valueInt(env) >  eR.valueInt(env);
+			return eL.valueInt(s) >  eR.valueInt(s);
 		case LE:
-			return eL.valueInt(env) <= eR.valueInt(env);
+			return eL.valueInt(s) <= eR.valueInt(s);
 		case LT:
-			return eL.valueInt(env) <  eR.valueInt(env);
+			return eL.valueInt(s) <  eR.valueInt(s);
 		case MINUS:
-			return eL.valueInt(env) - eR.valueInt(env);
+			return eL.valueInt(s) - eR.valueInt(s);
 		case NEQ:
-			return eL.value(env) != eR.value(env);
+			return !eL.value(s).eq(eR.value(s));
 		case OR:
-			return eL.valueBool(env) || eR.valueBool(env);
+			return eL.valueBool(s) || eR.valueBool(s);
 		case OR_ELSE:
-			return eL.valueBool(env) |  eR.valueBool(env);
+			return eL.valueBool(s) |  eR.valueBool(s);
 		case PLUS:
-			return eL.valueInt(env) + eR.valueInt(env);
+			return eL.valueInt(s) + eR.valueInt(s);
 		case REM:
-			return eL.valueInt(env) % eR.valueInt(env);
+			return eL.valueInt(s) % eR.valueInt(s);
 		case TIMES:
-			return eL.valueInt(env) * eR.valueInt(env);
+			return eL.valueInt(s) * eR.valueInt(s);
 		default:
 			return null;
 		}
