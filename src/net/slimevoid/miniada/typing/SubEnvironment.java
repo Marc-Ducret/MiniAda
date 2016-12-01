@@ -15,6 +15,7 @@ public class SubEnvironment extends Environment {
 	
 	@Override
 	public Type getVarType(Identifier id) throws TypeException {
+		if(getNameSpace(id) != NameSpace.VAR) throw new TypeException(id, id+" doesn't refer to a variable");
 		try {
 			return super.getVarType(id);
 		} catch(TypeException e) {
@@ -29,6 +30,7 @@ public class SubEnvironment extends Environment {
 	
 	@Override
 	protected TypeDefined getTypeFromTable(Identifier id) throws TypeException {
+		if(getNameSpace(id) != NameSpace.TYPE) throw new TypeException(id, id+" doesn't refer to a type");
 		try {
 			return super.getTypeFromTable(id);
 		} catch(TypeException e) {
@@ -38,6 +40,7 @@ public class SubEnvironment extends Environment {
 	
 	@Override
 	public DeclarationFunction getFunction(Identifier id) throws TypeException {
+		if(getNameSpace(id) != NameSpace.FUNC) throw new TypeException(id, id+" doesn't refer to a function");
 		try {
 			return super.getFunction(id);
 		} catch(TypeException e) {
@@ -47,11 +50,19 @@ public class SubEnvironment extends Environment {
 	
 	@Override
 	public DeclarationProcedure getProcedure(Identifier id)throws TypeException{
+		if(getNameSpace(id) != NameSpace.PROC) throw new TypeException(id, id+" doesn't refer to a procedure");
 		try {
 			return super.getProcedure(id);
 		} catch(TypeException e) {
 			return parent.getProcedure(id);
 		}
+	}
+	
+	@Override
+	public NameSpace getNameSpace(Identifier id) {
+		NameSpace ns = super.getNameSpace(id);
+		if(ns != null) return ns;
+		return parent.getNameSpace(id);
 	}
 	
 	@Override

@@ -78,7 +78,7 @@ public class Access extends SyntaxNode implements Typeable {
 			throw new TypeException(from, 
 					"Expected record or access to record");
 		TypeRecord rec = (TypeRecord) t;
-		alterable = from.isAlterable();
+		alterable = from.isAlterable() || rec.getMemberType(id.name).isAccess();
 		if(!rec.hasMember(id.name))
 			throw new TypeException(id, t.getName()+" has no field "+id);
 		return rec.getMemberType(id.name);

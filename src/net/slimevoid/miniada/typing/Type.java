@@ -30,4 +30,10 @@ public abstract class Type {
 				(this instanceof TypeDefined && 
 				((TypeDefined)this).getDefinition() instanceof TypeAccess);
 	}
+
+	public boolean isRecord() {
+		return this instanceof TypeRecord ||
+				(this instanceof TypeDefined && 
+				((TypeDefined)this).getDefinition().isRecord());
+	}
 }

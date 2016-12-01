@@ -61,7 +61,7 @@ public class DeclarationType extends Declaration {
 		if(def == null) {
 			env.declareType(name);
 		} else {
-			if(!env.isTypeDeclared(name))
+			if(!env.isTypeDeclaredLocally(name))
 				env.declareType(name);
 			env.defineType(name, def.buildDef(env, env.getType(name)));
 		}
