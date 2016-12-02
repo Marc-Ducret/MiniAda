@@ -15,6 +15,7 @@ public class TypeDefined extends Type {
 		return def;
 	}
 	
+	@Override
 	public boolean isDefined() {
 		return def != null;
 	}

@@ -31,16 +31,17 @@ public class Compiler {
 	
 	public static void main(String[] args) throws IOException {
 		Compiler comp = new Compiler();
-//		comp.compile(new File("input"), 0x3, 2);
-		comp.test("C:\\Users\\Marc\\Documents\\GitHub\\Maison-close\\");
+		comp.compile(new File("input"), 0x3, 2);
+//		comp.test("C:\\Users\\Marc\\Documents\\GitHub\\Maison-close\\"); 
+		//TODO change
 	}
 	
 	public void test(String tests) throws IOException {
 		long startTime = System.nanoTime();
 		runTests(new File(tests+"syntax/"), 1);
 		runTests(new File(tests+"typing/"), 2);
-//		runTests(new File(tests+"exec/"), 3);
-//		runTests(new File(tests+"exec-fail/"), 2);
+		runTests(new File(tests+"exec/"), 3);
+		runTests(new File(tests+"exec-fail/"), 2);
 		long elapsed = (System.nanoTime() - startTime)/1000000;
 		System.out.println("Testing ended in "+elapsed+" ms");
 	}
@@ -117,10 +118,12 @@ public class Compiler {
 				if(pass >= PASS_EXE) {
 					String n = f.getName();
 					FileReader read = new FileReader(
-							new File(testFolder, n.substring(0, n.length()-3)+"out"));
+							new File(testFolder, 
+									n.substring(0, n.length()-3)+"out"));
 					int r;
 					int i = 0;
 					while((r = read.read()) >= 0) {
+						if((char) r == '\r') continue;
 						expected += (char) r;
 						if(i >= res.length())
 							success = false;

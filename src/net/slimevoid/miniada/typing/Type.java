@@ -36,4 +36,8 @@ public abstract class Type {
 				(this instanceof TypeDefined && 
 				((TypeDefined)this).getDefinition().isRecord());
 	}
+	
+	public boolean isDefined() {
+		return true;
+	}
 }

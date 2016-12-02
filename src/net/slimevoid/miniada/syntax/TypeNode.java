@@ -43,7 +43,10 @@ public class TypeNode extends SyntaxNode implements Typeable {
 		if(isAccess) {
 			return env.getAccessForType(id);
 		}
-		return env.getType(id);
+		Type t = env.getType(id);
+		if(!t.isDefined())
+			throw new TypeException(id, "Type "+id+" is not defined");
+		return t;
 	}
 	
 	@Override
