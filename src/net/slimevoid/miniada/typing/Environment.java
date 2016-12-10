@@ -31,8 +31,7 @@ public class Environment {
 		if(!usedNames.containsKey(id.name.toLowerCase())) 
 			throw new TypeException(id, "Unknown variable "+id);
 		if(!isVarInit(id)) {
-//			throw new TypeException(id, "Variable "+id+" cannot be used here");
-			//TODO redo
+			throw new TypeException(id, "Variable "+id+" cannot be used here");
 		}
 		return varTypes.get(id.name.toLowerCase());
 	}

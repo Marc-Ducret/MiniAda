@@ -36,10 +36,9 @@ public class Compiler {
 	public static void main(String[] args) {
 		try {
 			Compiler comp = new Compiler();
-			if(args.length > 0) {
-				String a = args[0];
-				int pass = PASS_ASM;
-				String source = "";
+			String source = null;
+			int pass = PASS_ASM;
+			for(String a : args) {
 				if(a.startsWith("-")) {
 					if(a.equalsIgnoreCase("--parse-only")) {
 						pass = PASS_STX;
@@ -49,41 +48,24 @@ public class Compiler {
 						System.err.println("Unknown parameter \""+a+"\"");
 						System.exit(-1);
 					}
-					if(args.length > 1) source = args[1];
-					else {
-						System.err.println("No source file specified");
-						System.exit(-1);
-					}
 				} else {
-					source = args[0];
-				}
-				try {
-					if(!source.endsWith(".adbw")) {
-						System.err.println("Source file must end with \".adb\"");
+					if(source == null) source = a;
+					else {
+						System.err.println("Unknown parameter \""+a+"\"");
 						System.exit(-1);
 					}
-					if(comp.compile(new File(source), pass, 1)) {
-						
-					} else {
-						
-					}
- 				} catch(IOException e) {
- 					System.err.println("IO Exception: "+e.toString()+" "+
- 							(e.getMessage() == null ? "" : e.getMessage()));
- 					System.exit(-1);
- 				}
-			} else {
+				}
+			}
+			if(source == null) {
 				System.err.println("No source file specified");
 				System.exit(-1);
 			}
+			comp.compile(new File(source), pass, 1);
 		} catch(Exception e) {
 			System.err.println("Unhandeled exception:");
 			e.printStackTrace();
 			System.exit(2);
 		}
-		
-//        comp.test("C:\\Users\\Marc\\Documents\\GitHub\\Maison-close\\"); 
-		//TODO change
 	}
 	
 	public void test(String tests) throws IOException {
@@ -313,10 +295,13 @@ public class Compiler {
 	
 	public static Identifier matchIdent(TokenList toks) 
 			throws MatchException {
-		Yytoken tok = toks.next();
-		if(tok instanceof Identifier) {
-			return (Identifier) tok;
-		}
+		Yytoken tok;
+		try {
+			tok = toks.next();
+			if(tok instanceof Identifier) {
+				return (Identifier) tok;
+			}
+		} catch(MatchException e) {tok = toks.cur();};
 		Compiler.errorMatch(tok, "Expected identifier");
 		return null;
 	}

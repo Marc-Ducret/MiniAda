@@ -82,7 +82,7 @@ public class DeclarationFunction extends Declaration implements ASMRoutine {
 		if(params != null) {
 			for(Param p : params.ps) {
 				for(Identifier id : p.ids)
-					env.registerVar(id);
+					localEnv.registerVar(id);
 				Type t = p.type.computeType(localEnv);
 				for(Identifier id : p.ids) {
 					pars.add(new Par(id, t, p.mode.isOut));

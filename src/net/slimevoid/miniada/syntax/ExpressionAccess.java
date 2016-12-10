@@ -24,7 +24,6 @@ public class ExpressionAccess extends Expression {
 	public static ExpressionAccess matchExpressionAccess(TokenList toks) 
 			throws MatchException {
 		ExpressionAccess e = new ExpressionAccess(Access.matchAccess(toks));
-		toks.checkConsumed();
 		return e;
 	}
 

@@ -1,4 +1,3 @@
 #!/bin/bash
 
-cd bin
-java net/slimevoid/miniada/Compiler ../$*
+java -cp bin net/slimevoid/miniada/Compiler $*

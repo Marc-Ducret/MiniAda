@@ -2,7 +2,6 @@ package net.slimevoid.miniada.typing;
 
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValueAccess;
-import net.slimevoid.miniada.interpert.ValuePrimitive;
 
 public class TypeAccess extends Type {
 
