@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Keyword;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
@@ -15,6 +16,7 @@ import net.slimevoid.miniada.typing.TypeException;
 public abstract class Instruction extends SyntaxNode {
 	
 	public abstract void typeCheck(Environment env) throws TypeException;
+	public abstract void buildAsm(ASMBuilder build);
 	
 	public static Instruction matchInstruction(TokenList toks) 
 			throws MatchException {
@@ -25,7 +27,8 @@ public abstract class Instruction extends SyntaxNode {
 			InstructionBlock block = matchInstructionBlock(toks, 
 															KeywordType.END);
 			block.setFirstToken(begin);
-			block.setLastToken(Compiler.matchKeyword(toks, KeywordType.END));
+			Compiler.matchKeyword(toks, KeywordType.END);
+			block.setLastToken(Compiler.matchSymbol(toks, SymbolType.SEMICOLON));
 			return block;
 		}
 		if(toks.nextIsOcc(KeywordType.IF)) {
@@ -98,7 +101,7 @@ public abstract class Instruction extends SyntaxNode {
 		public boolean willReturn() throws TypeException {
 			boolean wret = false;
 			for(Instruction instr : instrs) {
-				if(wret) throw new TypeException(instr, "Dead code");
+//				if(wret) throw new TypeException(instr, "Dead code"); TODO keep?
 				if(instr.willReturn()) wret = true;
 			}
 			return wret;
@@ -110,6 +113,11 @@ public abstract class Instruction extends SyntaxNode {
 				if(i.execute(localS)) return true;
 			}
 			return false;
+		}
+
+		@Override
+		public void buildAsm(ASMBuilder asm) {
+			for(Instruction instr : instrs) instr.buildAsm(asm);
 		}
 	}
 }

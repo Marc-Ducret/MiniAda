@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Keyword;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
@@ -133,5 +134,10 @@ public class InstructionIf extends Instruction {
 				return block.execute(s);
 		}
 		return false;
+	}
+
+	@Override
+	public void buildAsm(ASMBuilder build) {
+		// TODO Auto-generated method stub
 	}
 }

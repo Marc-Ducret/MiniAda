@@ -37,15 +37,15 @@ public class Access extends SyntaxNode implements Typeable {
 			throws MatchException {
 		if(toks.gotoLastOcc(SymbolType.DOT)) {
 			Compiler.matchSymbol(toks, SymbolType.DOT);
-			toks.savePos();
 			Identifier id = Compiler.matchIdent(toks);
-			toks.revert();
-			toks.prev(); toks.prev(); toks.setBound();
+			toks.checkConsumed();
+			toks.prev(); toks.prev(); toks.prev(); toks.setBound();
 			toks.revert();
 			Expression from = Expression.matchExpression(toks);
 			return new Access(id, from, from.firstTok, id);
 		}
 		Identifier id = Compiler.matchIdent(toks);
+		toks.checkConsumed();
 		return new Access(id, id, id);
 	}
 	
@@ -61,26 +61,28 @@ public class Access extends SyntaxNode implements Typeable {
 		if(from == null) {
 			try {
 				func = env.getFunction(id);
-				alterable = func.retType.isAccess();
 				return func.retType;
 			} catch(TypeException e) {}
-			alterable = env.isAlterable(id) || env.getVarType(id).isAccess();
+			alterable = env.isAlterable(id);
 			return env.getVarType(id);
 		}
 		Type t = from.getType(env);
+		String typeName = t.getName();
 		while(true)
 			if(t instanceof TypeDefined)
 				t = ((TypeDefined) t).getDefinition();
-			else if(t instanceof TypeAccess)
+			else if(t instanceof TypeAccess) {
 				t = ((TypeAccess) t).type;
+				alterable = true;
+			}
 			else break;
 		if(!(t instanceof TypeRecord))
 			throw new TypeException(from, 
 					"Expected record or access to record");
 		TypeRecord rec = (TypeRecord) t;
-		alterable = from.isAlterable() || rec.getMemberType(id.name).isAccess();
+		alterable = from.isAlterable() || alterable;
 		if(!rec.hasMember(id.name))
-			throw new TypeException(id, t.getName()+" has no field "+id);
+			throw new TypeException(id, typeName+" has no field "+id);
 		return rec.getMemberType(id.name);
 	}
 }

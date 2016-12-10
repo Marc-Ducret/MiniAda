@@ -16,8 +16,8 @@ public abstract class Value {
 	public boolean toBool() {
 		return (boolean) ((ValuePrimitive)this).getVal();
 	}
-	
+
 	public ValueRecord toRecord() {
-		return ((ValueRecord)this);
+		return (ValueRecord) this;
 	}
 }

@@ -2,6 +2,9 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMConst;
+import net.slimevoid.miniada.execution.ASMBuilder.Registers;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
@@ -21,8 +24,14 @@ public class InstructionCall extends Instruction {
 	
 	public static InstructionCall matchInstructionCall(TokenList toks) 
 			throws MatchException {
+		if(toks.gotoFirstOcc(SymbolType.SEMICOLON)) {
+			toks.prev();
+			toks.setBound();
+			toks.revert();
+		}
 		InstructionCall ic = new InstructionCall(
-									MethodCall.matchMethodCall(toks));
+				MethodCall.matchMethodCall(toks));
+		toks.resetBound();
 		ic.setLastToken(Compiler.matchSymbol(toks, SymbolType.SEMICOLON));
 		return ic;
 	}
@@ -63,5 +72,15 @@ public class InstructionCall extends Instruction {
 			args[i] = call.exprs[i].value(s);
 		proc.execute(s, args);
 		return false;
+	}
+
+	@Override
+	public void buildAsm(ASMBuilder asm) {
+		//TODO finish
+		Expression e = call.exprs[0];
+		ExpressionConstant c = (ExpressionConstant) e;
+		asm.mov(new ASMConst((int) (char) c.value), Registers.RSI);
+		asm.call(proc.getLabel(asm));
+		asm.planBuild(proc);
 	}
 }

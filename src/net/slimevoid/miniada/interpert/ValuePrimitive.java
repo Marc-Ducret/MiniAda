@@ -12,8 +12,10 @@ public class ValuePrimitive extends Value {
 	public void copyTo(Value dest) {
 		if(this.val == null)
 			((ValueAccess)dest).var = null;
-		else
-			((ValuePrimitive)dest).val = this.val;
+		else {
+			ValuePrimitive prim = ((ValuePrimitive)dest);
+			prim.val = this.val;
+		}
 	}
 
 	@Override

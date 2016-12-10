@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.slimevoid.miniada.interpert.Scope;
+import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.syntax.MatchException;
 import net.slimevoid.miniada.syntax.SourceFile;
 import net.slimevoid.miniada.token.EOF;
@@ -19,7 +19,10 @@ import net.slimevoid.miniada.token.Symbol;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
 import net.slimevoid.miniada.token.Yytoken;
 import net.slimevoid.miniada.typing.Environment;
+import net.slimevoid.miniada.typing.Environment.NameSpace;
+import net.slimevoid.miniada.typing.Type;
 import net.slimevoid.miniada.typing.TypeException;
+import net.slimevoid.miniada.typing.TypePrimitive;
 
 
 public class Compiler {
@@ -27,12 +30,59 @@ public class Compiler {
 	public final static int PASS_LEX = 0x0,
 							PASS_STX = 0x1,
 							PASS_TYP = 0x2,
-							PASS_EXE = 0x3;
+							PASS_ASM = 0x3,
+							PASS_EXE = 0x4;
 	
-	public static void main(String[] args) throws IOException {
-		Compiler comp = new Compiler();
-		comp.compile(new File("input"), 0x3, 2);
-//		comp.test("C:\\Users\\Marc\\Documents\\GitHub\\Maison-close\\"); 
+	public static void main(String[] args) {
+		try {
+			Compiler comp = new Compiler();
+			if(args.length > 0) {
+				String a = args[0];
+				int pass = PASS_ASM;
+				String source = "";
+				if(a.startsWith("-")) {
+					if(a.equalsIgnoreCase("--parse-only")) {
+						pass = PASS_STX;
+					} else if(a.equalsIgnoreCase("--type-only")) {
+						pass = PASS_TYP;
+					} else {
+						System.err.println("Unknown parameter \""+a+"\"");
+						System.exit(-1);
+					}
+					if(args.length > 1) source = args[1];
+					else {
+						System.err.println("No source file specified");
+						System.exit(-1);
+					}
+				} else {
+					source = args[0];
+				}
+				try {
+					if(!source.endsWith(".adbw")) {
+						System.err.println("Source file must end with \".adb\"");
+						System.exit(-1);
+					}
+					if(comp.compile(new File(source), pass, 1)) {
+						
+					} else {
+						
+					}
+ 				} catch(IOException e) {
+ 					System.err.println("IO Exception: "+e.toString()+" "+
+ 							(e.getMessage() == null ? "" : e.getMessage()));
+ 					System.exit(-1);
+ 				}
+			} else {
+				System.err.println("No source file specified");
+				System.exit(-1);
+			}
+		} catch(Exception e) {
+			System.err.println("Unhandeled exception:");
+			e.printStackTrace();
+			System.exit(2);
+		}
+		
+//        comp.test("C:\\Users\\Marc\\Documents\\GitHub\\Maison-close\\"); 
 		//TODO change
 	}
 	
@@ -50,6 +100,7 @@ public class Compiler {
 			throws IOException {
 		return compile(file, maxPass, verbose, System.out);
 	}
+	
 	public boolean compile(File file, int maxPass, int verbose, PrintStream out) 
 			throws IOException {
 		boolean debug = verbose > 1;
@@ -62,18 +113,8 @@ public class Compiler {
 					SourceFile src = syntaxAnalysis(toks, debug);
 					if(maxPass >= PASS_TYP) {
 						typeAnalysis(src, debug);
-						if(maxPass >= PASS_EXE) {
-							if(debug) System.out.println("== EXEC ==");
-							try {
-								Library.setOutput(out);
-								src.dproc.execute(new Scope());
-							} catch (Exception e) {
-								System.err.println(
-									 "File \""+file.getName()+"\n"
-									+"Runtime error\n"
-									+e);
-								e.printStackTrace();
-							}
+						if(maxPass >= PASS_ASM) {
+							out.print(buildAsm(src, debug));
 						}
 					}
 				}
@@ -85,7 +126,6 @@ public class Compiler {
 				+", characters "+e.getColStart()+"-"+e.getColEnd()+":\n"
 				+e.phase+" error\n"
 				+e.message);
-				// TODO print the chars
 				if(debug) e.printStackTrace();
 			}
 			return false;
@@ -96,7 +136,7 @@ public class Compiler {
 		return true;
 	}
 	
-	public void runTests(File testFolder, int pass) throws IOException {
+	private void runTests(File testFolder, int pass) throws IOException {
 		if(!testFolder.exists()) {
 			System.out.println("No folder "+testFolder.getAbsolutePath());
 			return;
@@ -169,7 +209,7 @@ public class Compiler {
 		System.out.println("score: "+ok+"/"+ct);
 	}
 	
-	public TokenList lexicalAnalysis(File file, boolean debug)
+	private TokenList lexicalAnalysis(File file, boolean debug)
 			throws IOException {
 		if(debug) System.out.println("== LEXING ==");
 		Lexer lex = new Lexer(new FileReader(file));
@@ -191,7 +231,7 @@ public class Compiler {
 		return toks;
 	}
 	
-	public SourceFile syntaxAnalysis(TokenList toks, boolean debug)
+	private SourceFile syntaxAnalysis(TokenList toks, boolean debug)
 			throws MatchException {
 		if(debug) System.out.println("== SYNTAX ==");
 		SourceFile src = SourceFile.matchSourceFile(toks);
@@ -200,14 +240,36 @@ public class Compiler {
 		return src;
 	}
 	
-	public void typeAnalysis(SourceFile src, boolean debug)
+	private void typeAnalysis(SourceFile src, boolean debug)
 			throws TypeException {
 		if(debug) System.out.println("== TYPE ==");
-		Environment env = new Environment(null);
+		Environment env = new Environment(null) {
+			@Override
+			public Type getType(Identifier id) throws TypeException {
+				try {
+					return super.getType(id);
+				} catch(TypeException e) {
+					TypePrimitive prim = TypePrimitive.getPrimitive(id.name);
+					if(prim == null) throw e; 
+					return prim;
+				}
+			}
+		};
 		env.registerNativeProcedure(Library.PUT);
 		env.registerNativeProcedure(Library.NEW_LINE);
 		env.registerNativeFunction(Library.CHARACTER_VAL);
+		for(TypePrimitive t : TypePrimitive.primitives)
+			env.useName(new Identifier(t.getName()), NameSpace.TYPE);
 		src.dproc.typeDeclaration(env);
+	}
+	
+	private String buildAsm(SourceFile src, boolean debug) {
+		if(debug) System.out.println("== ASM ==");
+		ASMBuilder asm = new ASMBuilder();
+		asm.main(src.dproc.getLabel(asm));
+		asm.planBuild(src.dproc);
+		asm.build();
+		return asm.builtAsm();
 	}
 	
 	public static void errorMatch(Yytoken loc, String message) 

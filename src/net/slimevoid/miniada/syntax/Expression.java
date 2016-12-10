@@ -68,20 +68,24 @@ public abstract class Expression extends SyntaxNode implements Typeable {
 		if(toks.nextIsOcc(KeywordType.NEW)) {
 			return ExpressionNew.matchExpressionNew(toks);
 		}
+		if(toks.gotoFirstOcc(SymbolType.DOT)) {
+			toks.revert();
+			return ExpressionAccess.matchExpressionAccess(toks);
+		}
 		try {
 			Compiler.matchIdent(toks);
-			toks.prev(); toks.savePos();
-			try {
-				Expression e = ExpressionAccess.matchExpressionAccess(toks);
-				toks.dropSave();
-				return e;
-			} catch(MatchException e) {}
-			toks.revert();
-			return ExpressionCall.matchExpressionCall(toks);
-		} catch (MatchException e) {}
+			if(toks.outOfBounds()) {
+				toks.prev();
+				return ExpressionAccess.matchExpressionAccess(toks);
+			}
+		} catch (MatchException e) {
+			toks.prev();
+			Expression expr = ExpressionConstant.matchExpressionConstant(toks);
+			toks.checkConsumed();
+			return expr;
+		}
 		toks.prev();
-		Expression expr = ExpressionConstant.matchExpressionConstant(toks);
-		toks.checkConsumed();
+		Expression expr = ExpressionCall.matchExpressionCall(toks);
 		return expr;
 	}
 	

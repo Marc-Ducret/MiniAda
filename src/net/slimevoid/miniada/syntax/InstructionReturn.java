@@ -2,6 +2,7 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Keyword;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
@@ -65,5 +66,10 @@ public class InstructionReturn extends Instruction {
 	public boolean execute(Scope s) {
 		if(ret != null) s.setReturn(ret.value(s));
 		return true;
+	}
+
+	@Override
+	public void buildAsm(ASMBuilder build) {
+		// TODO Auto-generated method stub
 	}
 }

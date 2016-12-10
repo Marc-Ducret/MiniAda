@@ -28,22 +28,20 @@ public class Environment {
 	}
 	
 	public Type getVarType(Identifier id) throws TypeException {
-		if(!varTypes.containsKey(id.name.toLowerCase())) 
+		if(!usedNames.containsKey(id.name.toLowerCase())) 
 			throw new TypeException(id, "Unknown variable "+id);
+		if(!isVarInit(id)) {
+//			throw new TypeException(id, "Variable "+id+" cannot be used here");
+			//TODO redo
+		}
 		return varTypes.get(id.name.toLowerCase());
 	}
 	
 	public Type getType(Identifier id) throws TypeException {
-		try {
-			return getTypeFromTable(id);
-		} catch(TypeException e) {
-			TypePrimitive prim = TypePrimitive.getPrimitive(id.name);
-			if(prim == null) throw e; 
-			return prim;
-		}
+		return getTypeFromTable(id);
 	}
 	
-	protected TypeDefined getTypeFromTable(Identifier id) throws TypeException {
+	private TypeDefined getTypeFromTable(Identifier id) throws TypeException {
 		if(!types.containsKey(id.name.toLowerCase())) {
 			throw new TypeException(id, "Unknown type "+id.name);
 		}
@@ -76,9 +74,12 @@ public class Environment {
 		getTypeFromTable(id).define(def);
 	}
 	
-	public void registerVar(Identifier name, Type type) 
+	public void registerVar(Identifier name) 
 			throws TypeException {
 		useName(name, NameSpace.VAR);
+	}
+	
+	public void setVarType(Identifier name, Type type) {
 		varTypes.put(name.name.toLowerCase(), type);
 	}
 	
@@ -121,9 +122,9 @@ public class Environment {
 	public Type getAccessForType(Identifier typ) throws TypeException {
 		if(!isTypeDeclared(typ))
 			throw new TypeException(typ, "type "+typ.name+" isn't declared");
-		if(isTypeDefined(typ) && !getTypeFromTable(typ).isRecord())
+		if(isTypeDefined(typ) && !getType(typ).isRecord())
 			throw new TypeException(typ, "type "+typ.name+" isn't a record");
-		return new TypeAccess(getTypeFromTable(typ));
+		return new TypeAccess(getType(typ));
 	}
 	
 	public void useName(Identifier id, NameSpace space) throws TypeException {
@@ -137,8 +138,14 @@ public class Environment {
 			if(!t.isDefined())
 				throw new TypeException(loc, "Type "+t+" remains undefined");
 			if(t.isAccess() && !((TypeAccess)t.getDefinition()).type.isRecord())
-				throw new TypeException(loc, "Type "+t+" is an access to non record type");
+				throw new TypeException(loc, 
+						"Type "+t+" is an access to non record type");
 		}
+	}
+	
+	public boolean isVarInit(Identifier id) {
+		return !usedNames.containsKey(id.name.toLowerCase()) ||
+				varTypes.containsKey(id.name.toLowerCase());
 	}
 	
 	public boolean isAlterable(Identifier id) {

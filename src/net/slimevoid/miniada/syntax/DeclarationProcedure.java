@@ -5,6 +5,8 @@ import java.util.List;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMRoutine;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.SubScope;
 import net.slimevoid.miniada.interpert.Value;
@@ -18,7 +20,7 @@ import net.slimevoid.miniada.typing.SubEnvironment;
 import net.slimevoid.miniada.typing.Type;
 import net.slimevoid.miniada.typing.TypeException;
 
-public class DeclarationProcedure extends Declaration {
+public class DeclarationProcedure extends Declaration implements ASMRoutine {
 	
 	public final Identifier name;
 	public final Params params;
@@ -27,6 +29,9 @@ public class DeclarationProcedure extends Declaration {
 	
 	public Par[] pars;
 	public Environment localEnv;
+	
+	private String label;
+	private boolean planned;
 	
 	protected DeclarationProcedure(Identifier name, Params pars, 
 			Declaration[] decls, InstructionBlock instrs) {
@@ -71,10 +76,12 @@ public class DeclarationProcedure extends Declaration {
 		localEnv = new SubEnvironment(env, null);
 		if(params != null) {
 			for(Param p : params.ps) {
+				for(Identifier id : p.ids)
+					localEnv.registerVar(id);
 				Type t = p.type.computeType(localEnv);
 				for(Identifier id : p.ids) {
 					pars.add(new Par(id, t, p.mode.isOut));
-					localEnv.registerVar(id, t);
+					localEnv.setVarType(id, t);
 					if(!p.mode.isOut) localEnv.restricAlteration(id);
 				}
 			}
@@ -82,7 +89,7 @@ public class DeclarationProcedure extends Declaration {
 		this.pars = pars.toArray(new Par[pars.size()]);
 		env.registerProcedure(this);
 		for(Declaration decl : decls) decl.typeDeclaration(localEnv);
-		if(decls.length > 0) localEnv.checkDefinitions(decls[decls.length-1]); //TODO notlikethis #testtype6
+		if(decls.length > 0) localEnv.checkDefinitions(decls[decls.length-1]);
 		instrs.typeCheck(localEnv);
 	}
 	
@@ -93,6 +100,30 @@ public class DeclarationProcedure extends Declaration {
 		}
 		for(Declaration decl : decls) decl.init(localS);
 		instrs.execute(localS);
+	}
+	
+	@Override
+	public void buildASM(ASMBuilder asm) {
+		asm.label(getLabel(asm));
+		instrs.buildAsm(asm);
+		asm.ret();
+	}
+	
+	@Override
+	public String getLabel(ASMBuilder asm) {
+		if(label == null) label = asm.newLabel();
+		return label;
+	}
+	
+
+	@Override
+	public boolean isPlanned() {
+		return planned;
+	}
+	
+	@Override
+	public void setPlanned() {
+		this.planned = true;
 	}
 	
 	@Override

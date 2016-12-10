@@ -1,6 +1,8 @@
 package net.slimevoid.miniada.typing;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.slimevoid.miniada.interpert.Value;
@@ -10,6 +12,7 @@ import net.slimevoid.miniada.interpert.ValuePrimitive;
 public abstract class TypePrimitive extends Type {
 	
 	private static final Map<String, TypePrimitive> prims = new HashMap<>();
+	public static final List<TypePrimitive> primitives = new ArrayList<>();
 
 	public static final TypePrimitive INTEGER = new TypePrimitive("Integer"){
 		public Value defaultValue() {
@@ -45,6 +48,7 @@ public abstract class TypePrimitive extends Type {
 	private TypePrimitive(String name) {
 		super(name);
 		prims.put(name.toLowerCase(), this);
+		primitives.add(this);
 	}
 	
 	public static TypePrimitive getPrimitive(String name) {
