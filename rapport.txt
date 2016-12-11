@@ -1,0 +1,81 @@
+### Projet de Compilation : Compilateur MiniADA ###
+
+{ Choix du langage }
+
+J'ai choisi le Java simplement pour la modularité apportée par l'aspect Orienté 
+Objet et parce qu'il m'est agréable de programmer en Java.
+
+
+{ Utilisation }
+
+Pour utiliser ce compilateur, un JRE (Java Runtime Environement) avec une
+version supérieure à 1.8 est supposé.
+
+
+{ Analyse Lexicale }
+
+Sources : lexer.flex, package token, fonction lexicalAnalysis de Compiler
+
+Il n'y rien de spécial ici si ce n'est la nécessite de définir
+LocalizedException (la classe définissant les erreurs du compilateur) comme une
+sous classe de IOException pour que la fonction générée par JFlex puisse lever
+de telles exceptions.
+On reconnait "Character'Val" comme un identifier et à la casse près, c'est la
+seule manière d'introduire une apostrophe.
+
+
+{ Analyse Syntaxique }
+
+Sources : package syntax, fonctions syntaxAnalysis, matchSymbol, matchKeyword,
+matchSymbol de Compiler
+
+Ayant commencé cette partie avant la fin du cours la concernant et l'outil
+correspondant pour Java semblant contraignant, j'ai décidé d'écrire le parseur
+sans outil. 
+Le parseur prend en entrée la liste des lexèmes (TokenList) et construit l'arbre
+ syntaxique en la parcourant.
+Cet arbre est constitué d'objets de types Instruction, Declaration et
+Expression. Dans ceux-ci, la partie relative à l'analyse syntaxique est
+constituée des méthodes "match****".
+Dans chacune des classes concernant l'arbre syntaxique, on trouve des méthodes
+"type****" concernant le typage, "execute****" ou "value****" concerant un
+interpréteur réalisé à des fins de vérifications et "buildASM" concernant
+la production de code.
+La seule difficulté que j'ai rencontrée dans cette partie a été de concevoir dés
+le début les conventions par lesquelles agir sur la TokenList. En effet, un
+manque d'uniformité peut vite provoquer des comportements imprévus.
+A ce niveau, un appel de fonction sans paramètre et l'accès à une variable sont
+indifférentiables ainsi on convient que les deux soient représentés par un
+Access.
+
+{ Analyse de Type }
+
+Sources : package type, functions typeAnalysis de Compiler, functions type****
+des noeuds de l'arbre de syntaxe.
+Un Environnement contient toutes les informations locales concernant les
+variables, fonctions, procédures et types déclarés. Il est alors propre à un
+niveau de déclaration. Pour pouvoir accéder aux déclaration précédentes,
+l’environnement des sous fonctions-procédures est en fait un SubEnvironement.
+L’environnement racine est particulier puisque qu'il contient les types
+primitifs Integer, Boolean et Character et les fonctions primitives Put, NewLine
+et Character'Val.
+Chaque type est représenté par une unique instance d'une sous classe de Type.
+Un type défini par une déclaration est une instance de TypeDefined qui possède
+un membre étant la définition du type en question représentée par un autre objet
+Type.
+Une difficulté rencontrée a été de concevoir cette structure de type. Il fallait
+une structure permettant de construire l'objet d'un type avant de le définir
+et ensuite de lui affecter une définition.
+En dehors de ça, il n'y a rien de très spécifique à ce typeur.
+
+
+{ Autres packages }
+
+Les packages execution et interpret peuvent être ignorés. Le premier contient
+d'une part une ébauche de code pour générer le code assembleur et d'autre part
+un serveur/client pour pouvoir exécuter l'assembleur généré sur une machine
+Linux (je développe avec Windows). Le second est un interpréteur qui m'a
+permis de confirmer la compréhension que j'avais du fonctionnement voulu des
+programmes Ada.
+
+### Marc Ducret - 2016 ###

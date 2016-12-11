@@ -25,7 +25,7 @@ public class InstructionAssign extends Instruction {
 		Type tLeft = access.computeType(env);
 		Type tRight = expr.computeType(env);
 		if(!access.alterable)
-			throw new TypeException(access, "Not alterable");
+			throw new TypeException(access, access+" is not alterable");
 		if(!tRight.canBeCastedInto(tLeft))
 			throw new TypeException(access, 
 					"Type "+tRight+" is incompatible with "+tLeft);
