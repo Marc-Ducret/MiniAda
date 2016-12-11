@@ -41,7 +41,7 @@ public class InstructionFor extends Instruction {
 		Identifier var = Compiler.matchIdent(toks);
 		Compiler.matchKeyword(toks, KeywordType.IN);
 		boolean reverse = toks.nextIsOcc(KeywordType.REVERSE);
-		if(reverse) toks.next();
+		if(reverse) toks.nextBoundChecked();
 		if(!toks.gotoFirstOcc(SymbolType.DOTDOT))
 			throw new MatchException(toks.cur(), "Expected \"..\"");
 		Symbol dot = Compiler.matchSymbol(toks, SymbolType.DOTDOT);
@@ -50,16 +50,16 @@ public class InstructionFor extends Instruction {
 		toks.revert();
 		Expression from = Expression.matchExpression(toks);
 		toks.resetBound();
-		toks.goTo(dot); toks.next();
+		toks.goTo(dot); toks.nextBoundChecked();
 		if(!toks.gotoFirstOcc(KeywordType.LOOP))
-			throw new MatchException(toks.next(), "Expected keyword \"loop\"");
+			throw new MatchException(toks.cur(), "Expected keyword \"loop\"");
 		Keyword loop = Compiler.matchKeyword(toks, KeywordType.LOOP);
 		toks.prev(); toks.prev();
 		toks.setBound();
 		toks.revert();
 		Expression to = Expression.matchExpression(toks);
 		toks.resetBound();
-		toks.goTo(loop); toks.next();
+		toks.goTo(loop); toks.nextBoundChecked();
 		InstructionBlock block = matchInstructionBlock(toks, KeywordType.END);
 		Compiler.matchKeyword(toks, KeywordType.END);
 		Compiler.matchKeyword(toks, KeywordType.LOOP);

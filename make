@@ -4,7 +4,8 @@ if [[ "$@" == "clean" ]]
 then
     echo "Cleaning..."
 	cd bin
-	rm *
+	rm -R *
+	echo "Cleaning terminated"
 else
 	echo "Compiling ADAc..."
     cd src

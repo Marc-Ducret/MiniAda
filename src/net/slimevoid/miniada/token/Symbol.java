@@ -2,9 +2,18 @@ package net.slimevoid.miniada.token;
 
 public class Symbol extends Yytoken {
 
-	public static enum SymbolType {EQ, NEQ, GT, GE, LT, LE, PLUS, MINUS, 
-									TIMES, DIVIDE, DOT, SEMICOLON, COMMA,
-									COLON, LPAR, RPAR, COLONEQ, DOTDOT}
+	public static enum SymbolType {
+		EQ("="), NEQ("/="), GT(">"), GE(">="), LT("<"), LE("<="), 
+		PLUS("+"), MINUS("-"), TIMES("*"), DIVIDE("/"), DOT("."), 
+		SEMICOLON(";"), COMMA(","), COLON(":"), LPAR("("), RPAR(")"), 
+		COLONEQ(":="), DOTDOT("..");
+									
+		public final String sym;
+		
+		private SymbolType(String sym) {
+			this.sym = sym;
+		}
+	}
 	
 	public final SymbolType type;
 	
@@ -14,6 +23,6 @@ public class Symbol extends Yytoken {
 	
 	@Override
 	public String toString() {
-		return super.toString()+type;
+		return super.toString()+type.sym;
 	}
 }

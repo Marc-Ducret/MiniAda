@@ -45,12 +45,16 @@ public class TokenList {
 		return tokens[cur];
 	}
 	
-	public Yytoken next() throws MatchException { //TODO if fail?
+	public Yytoken next() throws OutOfBoundsException {
 		if(outOfBounds()) {
-			Yytoken tok = cur >= tokens.length ? tokens[cur] : tokens[cur-1];
-			throw new MatchException(tok, 
+			throw new OutOfBoundsException( 
 					"Internal error (out of bounds)");
 		}
+		return nextBypassBound();
+	}
+	
+	public Yytoken nextBoundChecked() {
+		assert(!outOfBounds());
 		return nextBypassBound();
 	}
 	
@@ -78,7 +82,7 @@ public class TokenList {
 		Yytoken tok;
 		try {
 			tok = next();
-		} catch (MatchException e) {
+		} catch (OutOfBoundsException e) {
 			return false;
 		}
 		prev();
@@ -138,7 +142,7 @@ public class TokenList {
 						prev(); savePos(); next();
 					}
 			}
-		} catch (MatchException e) {
+		} catch (OutOfBoundsException e) {
 		}
 		revert();
 		return found;
@@ -187,7 +191,7 @@ public class TokenList {
 						return true;
 					}
 			}
-		} catch (MatchException e) {
+		} catch (OutOfBoundsException e) {
 		}
 		revert();
 		return false;
@@ -206,10 +210,10 @@ public class TokenList {
 	}
 	
 	public void checkConsumed() throws MatchException {
-		if(cur <= bound) {
+		try {
 			Yytoken tok = next(); prev();
 			throw new MatchException(tok, "Unexpected token");
-		}
+		} catch (OutOfBoundsException e) {} 
 	}
 	
 	public void printState() {
@@ -222,5 +226,21 @@ public class TokenList {
 	
 	public boolean isBounded() {
 		return bound < tokens.length-1;
+	}
+	
+	public static class OutOfBoundsException extends Exception {
+
+		private static final long serialVersionUID = 1L;
+		
+		private String msg;
+		
+		public OutOfBoundsException(String msg) {
+			this.msg = msg;
+		}
+		
+		@Override
+		public String getMessage() {
+			return msg;
+		}
 	}
 }

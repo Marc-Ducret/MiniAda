@@ -19,7 +19,7 @@ public class Environment {
 	private Map<String, TypeDefined> types = new HashMap<>();
 	private Map<String, DeclarationFunction> functions = new HashMap<>();
 	private Map<String, DeclarationProcedure> procedures = new HashMap<>();
-	private Map<String, NameSpace> usedNames = new HashMap<>();
+	private Map<String, NameSpace> nameSpaces = new HashMap<>();
 	
 	public final Type expectedReturn;
 	
@@ -28,7 +28,7 @@ public class Environment {
 	}
 	
 	public Type getVarType(Identifier id) throws TypeException {
-		if(!usedNames.containsKey(id.name.toLowerCase())) 
+		if(!nameSpaces.containsKey(id.name.toLowerCase())) 
 			throw new TypeException(id, "Unknown variable "+id);
 		if(!isVarInit(id)) {
 			throw new TypeException(id, "Variable "+id+" cannot be used here");
@@ -96,13 +96,13 @@ public class Environment {
 	
 	public void registerNativeProcedure(NativeProcedure proc)
 			throws TypeException {
-		usedNames.put(proc.name.toLowerCase(), NameSpace.PROC);
+		nameSpaces.put(proc.name.toLowerCase(), NameSpace.PROC);
 		procedures.put(proc.name.toLowerCase(), proc);
 	}
 	
 	public void registerNativeFunction(NativeFunction func) 
 			throws TypeException {
-		usedNames.put(func.name.toLowerCase(), NameSpace.FUNC);
+		nameSpaces.put(func.name.toLowerCase(), NameSpace.FUNC);
 		functions.put(func.name.toLowerCase(), func);
 	}
 	
@@ -127,9 +127,9 @@ public class Environment {
 	}
 	
 	public void useName(Identifier id, NameSpace space) throws TypeException {
-		if(usedNames.containsKey(id.name.toLowerCase()))
+		if(nameSpaces.containsKey(id.name.toLowerCase()))
 			throw new TypeException(id, "identifier "+id+" is already used");
-		usedNames.put(id.name.toLowerCase(), space);
+		nameSpaces.put(id.name.toLowerCase(), space);
 	}
 	
 	public void checkDefinitions(SyntaxNode loc) throws TypeException {
@@ -143,7 +143,7 @@ public class Environment {
 	}
 	
 	public boolean isVarInit(Identifier id) {
-		return !usedNames.containsKey(id.name.toLowerCase()) ||
+		return !nameSpaces.containsKey(id.name.toLowerCase()) ||
 				varTypes.containsKey(id.name.toLowerCase());
 	}
 	
@@ -156,6 +156,6 @@ public class Environment {
 	}
 	
 	public NameSpace getNameSpace(Identifier id) {
-		return usedNames.get(id.name.toLowerCase());
+		return nameSpaces.get(id.name.toLowerCase());
 	}
 }

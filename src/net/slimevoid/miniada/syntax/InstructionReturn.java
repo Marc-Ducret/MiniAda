@@ -28,8 +28,8 @@ public class InstructionReturn extends Instruction {
 		Expression ret = null;
 		if(!toks.nextIsOcc(SymbolType.SEMICOLON)) {
 			if(!toks.gotoFirstOcc(SymbolType.SEMICOLON))
-				throw new MatchException(toks.next(), "Expected ';'");
-			Symbol semicol = (Symbol) toks.next();
+				throw new MatchException(toks.cur(), "Expected ';'");
+			Symbol semicol = (Symbol) toks.nextBoundChecked();
 			toks.prev(); toks.prev();
 			toks.setBound();
 			toks.revert();

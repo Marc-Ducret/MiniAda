@@ -32,7 +32,7 @@ public class DeclarationType extends Declaration {
 		Identifier name = Compiler.matchIdent(toks);
 		TypeDefinition def = null;
 		if(toks.nextIsOcc(KeywordType.IS)) {
-			toks.next();
+			toks.nextBoundChecked();
 			Keyword k = Compiler.matchKeyword(toks, KeywordType.ACCESS, 
 													KeywordType.RECORD);
 			if(k.type == KeywordType.ACCESS) {

@@ -2,6 +2,7 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.TokenList.OutOfBoundsException;
 import net.slimevoid.miniada.token.Keyword;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
 import net.slimevoid.miniada.typing.Type;
@@ -25,7 +26,12 @@ public class Operator extends SyntaxNode {
 	
 	public static Operator matchOperator(TokenList toks) 
 			throws MatchException {
-		Yytoken tok = toks.next();
+		Yytoken tok;
+		try {
+			tok = toks.next();
+		} catch (OutOfBoundsException e) {
+			throw new MatchException(toks.cur(), "Expected operator");
+		}
 		if(tok instanceof Symbol) {
 			for(OperatorType ot : OperatorType.values()) {
 				if(ot.name().equalsIgnoreCase(((Symbol) tok).type.name())) {

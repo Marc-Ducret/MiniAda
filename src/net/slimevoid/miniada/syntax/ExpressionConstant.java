@@ -1,6 +1,7 @@
 package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.TokenList.OutOfBoundsException;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValueAccess;
@@ -30,7 +31,12 @@ public class ExpressionConstant extends Expression {
 	
 	public static ExpressionConstant matchExpressionConstant(TokenList toks) 
 			throws MatchException {
-		Yytoken tok = toks.next();
+		Yytoken tok;
+		try {
+			tok = toks.next();
+		} catch (OutOfBoundsException e) {
+			throw new MatchException(toks.cur(), "Expected expression");
+		}
 		ExpressionConstant cst = null; 
 		if(tok instanceof ConstInt)
 			cst = new ExpressionConstant(((ConstInt) tok).value);

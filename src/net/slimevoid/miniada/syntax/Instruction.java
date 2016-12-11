@@ -47,7 +47,7 @@ public abstract class Instruction extends SyntaxNode {
 			toks.revert();
 			return InstructionCall.matchInstructionCall(toks);
 		}
-		throw new MatchException(toks.next(), "Expected instruction");
+		throw new MatchException(toks.cur(), "Expected instruction");
 	}
 	
 	public abstract boolean willReturn() throws TypeException;
@@ -101,7 +101,7 @@ public abstract class Instruction extends SyntaxNode {
 		public boolean willReturn() throws TypeException {
 			boolean wret = false;
 			for(Instruction instr : instrs) {
-//				if(wret) throw new TypeException(instr, "Dead code"); TODO keep?
+				if(wret) throw new TypeException(instr, "Dead code");
 				if(instr.willReturn()) wret = true;
 			}
 			return wret;

@@ -33,7 +33,7 @@ public class MethodCall extends SyntaxNode {
 				throw new MatchException(toks.cur(), "Unexpected token");
 			}
 			toks.revert();
-			toks.next();
+			toks.nextBoundChecked();
 			while(true) {
 				toks.gotoFirstOcc(SymbolType.RPAR, SymbolType.COMMA);
 				Symbol sym = Compiler.matchSymbol(toks, SymbolType.RPAR, 
@@ -42,7 +42,7 @@ public class MethodCall extends SyntaxNode {
 				toks.revert();
 				exprs.add(Expression.matchExpression(toks));
 				toks.resetBound();
-				toks.goTo(sym); toks.next();
+				toks.goTo(sym); toks.nextBoundChecked();
 				if(sym.type == SymbolType.RPAR) {
 					break;
 				}

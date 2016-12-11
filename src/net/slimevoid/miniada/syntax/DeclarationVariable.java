@@ -30,14 +30,14 @@ public class DeclarationVariable extends Declaration {
 		List<Identifier> ids = new ArrayList<>();
 		ids.add(Compiler.matchIdent(toks));
 		while(toks.nextIsOcc(SymbolType.COMMA)) {
-			toks.next();
+			toks.nextBoundChecked();
 			ids.add(Compiler.matchIdent(toks));
 		}
 		Compiler.matchSymbol(toks, SymbolType.COLON);
 		TypeNode type = TypeNode.matchType(toks);
 		Expression init = null;
 		if(toks.nextIsOcc(SymbolType.COLONEQ)) {
-			toks.next();
+			toks.nextBoundChecked();
 			if(toks.gotoFirstOcc(SymbolType.SEMICOLON)) {
 				Symbol scol = Compiler.matchSymbol(toks, SymbolType.SEMICOLON);
 				toks.prev(); toks.prev(); toks.setBound();

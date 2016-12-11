@@ -25,7 +25,7 @@ public class ConstInt extends Yytoken {
 	public void specifyLocation(int line, int colS, int colE) 
 			throws LexingException {
 		super.specifyLocation(line, colS, colE);
-		if(value > 2147483648L) throw new LexingException(line, colS, 
+		if(outOfBounds) throw new LexingException(line, colS, 
 								"integer constant is out of bounds");
 	}
 	

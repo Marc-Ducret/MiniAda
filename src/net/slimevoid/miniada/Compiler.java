@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.slimevoid.miniada.TokenList.OutOfBoundsException;
 import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.syntax.MatchException;
 import net.slimevoid.miniada.syntax.SourceFile;
@@ -103,11 +104,17 @@ public class Compiler {
 			}
 		} catch (LocalizedException e) {
 			if(!silent) {
-				System.err.println(
-				 "File \""+file.getName()+"\", line "+e.getLine()
-				+", characters "+e.getColStart()+"-"+e.getColEnd()+":\n"
-				+e.phase+" error\n"
-				+e.message);
+				if(e.getLine() < 0)
+					System.err.println(
+					 "File \""+file.getName()+"\", end of file:\n"
+					+e.phase+" error\n"
+					+e.message);
+				else 
+					System.err.println(
+					 "File \""+file.getName()+"\", line "+e.getLine()
+					+", characters "+e.getColStart()+"-"+e.getColEnd()+":\n"
+					+e.phase+" error\n"
+					+e.message);
 				if(debug) e.printStackTrace();
 			}
 			return false;
@@ -261,34 +268,40 @@ public class Compiler {
 	
 	public static Keyword matchKeyword(TokenList toks, KeywordType...types) 
 			throws MatchException {
-		Yytoken tok = toks.next();
 		String strTypes = "";
 		for(KeywordType kt : types) {
-			strTypes += kt.name()+", ";
+			strTypes += kt.name().toLowerCase()+", ";
 		}
 		strTypes = strTypes.substring(0, strTypes.length()-2);
-		if(tok instanceof Keyword) {
-			Keyword k = (Keyword) tok;
-			for(KeywordType kt : types)
-				if(kt == k.type) return k;
-		}
+		Yytoken tok;
+		try {
+			tok = toks.next();
+			if(tok instanceof Keyword) {
+				Keyword k = (Keyword) tok;
+				for(KeywordType kt : types)
+					if(kt == k.type) return k;
+			}
+		} catch(OutOfBoundsException e) {tok = toks.cur();};
 		Compiler.errorMatch(tok, "Expected keyword ("+strTypes+")");
 		return null;
 	}
 	
 	public static Symbol matchSymbol(TokenList toks, SymbolType...types) 
 			throws MatchException {
-		Yytoken tok = toks.next();
 		String strTypes = "";
-		for(SymbolType kt : types) {
-			strTypes += kt.name()+", ";
+		for(SymbolType st : types) {
+			strTypes += st.sym+", ";
 		}
 		strTypes = strTypes.substring(0, strTypes.length()-2);
-		if(tok instanceof Symbol) {
-			Symbol s = (Symbol) tok;
-			for(SymbolType st : types)
-				if(st == s.type) return s;
-		}
+		Yytoken tok;
+		try {
+			tok = toks.next();
+			if(tok instanceof Symbol) {
+				Symbol s = (Symbol) tok;
+				for(SymbolType st : types)
+					if(st == s.type) return s;
+			}
+		} catch(OutOfBoundsException e) {tok = toks.cur();};
 		Compiler.errorMatch(tok, "Expected symbol ("+strTypes+")");
 		return null;
 	}
@@ -301,18 +314,21 @@ public class Compiler {
 			if(tok instanceof Identifier) {
 				return (Identifier) tok;
 			}
-		} catch(MatchException e) {tok = toks.cur();};
+		} catch(OutOfBoundsException e) {tok = toks.cur();};
 		Compiler.errorMatch(tok, "Expected identifier");
 		return null;
 	}
 	
 	public static EOF matchEOF(TokenList toks) 
 			throws MatchException {
-		Yytoken tok = toks.next();
-		if(tok instanceof EOF) {
-			return (EOF) tok;
-		}
-		Compiler.errorMatch(tok, "Expected EOF");
+		Yytoken tok;
+		try {
+			tok = toks.next();
+			if(tok instanceof EOF) {
+				return (EOF) tok;
+			}
+		} catch(OutOfBoundsException e) {tok = toks.cur();};
+		Compiler.errorMatch(tok, "Expected end of file");
 		return null;
 	}
 }

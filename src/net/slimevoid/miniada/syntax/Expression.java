@@ -20,6 +20,7 @@ public abstract class Expression extends SyntaxNode implements Typeable {
 
 	/**
 	 * Warning: no guarantee on the TokenList resulting position
+	 * assumes that the TokenList is bounded to the end of the expression
 	 */
 	public static Expression matchExpression(TokenList toks) 
 			throws MatchException {
@@ -52,12 +53,12 @@ public abstract class Expression extends SyntaxNode implements Typeable {
 			return ExpressionBinOperator.matchExpressionBinOperator(toks, 
 					Operator.matchOperator(toks));
 		if(toks.nextIsOcc(SymbolType.LPAR)) {
-			Symbol lpar = (Symbol) toks.next();
+			Symbol lpar = (Symbol) toks.nextBoundChecked();
 			toks.savePos();
 			toks.goToBound();
 			if(!toks.nextIsOcc(SymbolType.RPAR))
 				throw new MatchException(lpar, "Unmatched parenthesis");
-			Symbol rpar = (Symbol) toks.next();
+			Symbol rpar = (Symbol) toks.nextBoundChecked();
 			toks.prev(); toks.prev(); toks.setBound();
 			toks.revert();
 			Expression expr = matchExpression(toks);

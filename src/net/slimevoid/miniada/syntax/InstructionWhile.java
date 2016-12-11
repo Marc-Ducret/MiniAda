@@ -30,14 +30,14 @@ public class InstructionWhile extends Instruction {
 			throws MatchException {
 		Keyword whilee = Compiler.matchKeyword(toks, KeywordType.WHILE);
 		if(!toks.gotoFirstOcc(KeywordType.LOOP))
-			throw new MatchException(toks.next(), "Expected keyword \"loop\"");
+			throw new MatchException(toks.cur(), "Expected keyword \"loop\"");
 		Keyword loop = Compiler.matchKeyword(toks, KeywordType.LOOP);
 		toks.prev(); toks.prev();
 		toks.setBound();
 		toks.revert();
 		Expression cond = Expression.matchExpression(toks);
 		toks.resetBound();
-		toks.goTo(loop); toks.next();
+		toks.goTo(loop); toks.nextBoundChecked();
 		InstructionBlock block = matchInstructionBlock(toks, KeywordType.END);
 		Compiler.matchKeyword(toks, KeywordType.END);
 		Compiler.matchKeyword(toks, KeywordType.LOOP);

@@ -53,7 +53,7 @@ public class InstructionAssign extends Instruction {
 		toks.revert();
 		Access acc = Access.matchAccess(toks);
 		toks.resetBound();
-		toks.goTo(semicol); toks.next();
+		toks.goTo(semicol); toks.nextBoundChecked();
 		return new InstructionAssign(expr, acc);
 	}
 

@@ -35,12 +35,12 @@ public class InstructionIf extends Instruction {
 		// Check AND THEN issue
 		toks.prev();
 		while(toks.nextIsOcc(KeywordType.AND)) {
-			toks.next(); toks.next();
+			toks.nextBoundChecked(); toks.nextBoundChecked();
 			if(!toks.gotoFirstOcc(KeywordType.THEN))
 				return false;
 			toks.dropSave(); toks.prev();
 		}
-		toks.next();
+		toks.nextBoundChecked();
 		// end check
 		return true;
 	}
@@ -49,7 +49,7 @@ public class InstructionIf extends Instruction {
 			throws MatchException {
 		Keyword iff = Compiler.matchKeyword(toks, KeywordType.IF);
 		if(!goToTheThen(toks))
-			throw new MatchException(toks.next(), "Expected keyword \"then\"");
+			throw new MatchException(toks.cur(), "Expected keyword \"then\"");
 		Keyword then = Compiler.matchKeyword(toks, KeywordType.THEN);
 		List<Expression> conds = new ArrayList<>();
 		List<InstructionBlock> blocks = new ArrayList<>();
@@ -58,14 +58,14 @@ public class InstructionIf extends Instruction {
 		toks.revert();
 		conds.add(Expression.matchExpression(toks));
 		toks.resetBound();
-		toks.goTo(then); toks.next();
+		toks.goTo(then); toks.nextBoundChecked();
 		blocks.add(matchInstructionBlock(toks, 	KeywordType.END,
 				 								KeywordType.ELSE,
 				 								KeywordType.ELSIF));
 		while(toks.nextIsOcc(KeywordType.ELSIF)) {
-			toks.next();
+			toks.nextBoundChecked();
 			if(!goToTheThen(toks))
-				throw new MatchException(toks.next(), 
+				throw new MatchException(toks.cur(), 
 						"Expected keyword \"then\"");
 			then = Compiler.matchKeyword(toks, KeywordType.THEN);
 			toks.prev(); toks.prev();
@@ -73,13 +73,13 @@ public class InstructionIf extends Instruction {
 			toks.revert();
 			conds.add(Expression.matchExpression(toks));
 			toks.resetBound();
-			toks.goTo(then); toks.next();
+			toks.goTo(then); toks.nextBoundChecked();
 			blocks.add(matchInstructionBlock(toks, 	KeywordType.END,
 													KeywordType.ELSE,
 													KeywordType.ELSIF));
 		}
 		if(toks.nextIsOcc(KeywordType.ELSE)) {
-			toks.next();
+			toks.nextBoundChecked();
 			conds.add(null);
 			blocks.add(matchInstructionBlock(toks, 	KeywordType.END,
 													KeywordType.ELSE,
