@@ -84,9 +84,11 @@ public class ASMBuilder {
 		arglessInstr("ret");
 	}
 	
-	public void registerString(String dataName, String str) {
-		data.append(dataName).append(":\n\t.string \"").append(str)
+	public ASMData registerString(String str) {
+		ASMData d = new ASMData(newDataName());
+		data.append(d.name).append(":\n\t.string \"").append(str)
 			.append("\"\n'");
+		return d;
 	}
 	
 	public String newLabel() {

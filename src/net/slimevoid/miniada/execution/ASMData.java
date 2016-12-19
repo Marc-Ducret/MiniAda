@@ -4,12 +4,12 @@ public class ASMData implements ASMOperand {
 	
 	public final String name;
 	
-	public ASMData(String name) {
+	protected ASMData(String name) {
 		this.name = name;
 	}
 
 	@Override
 	public void appendToBuilder(StringBuilder buff) {
-		// TODO
+		buff.append('$').append(name);
 	}
 }

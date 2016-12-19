@@ -2,13 +2,14 @@ package net.slimevoid.miniada.execution;
 
 public class ASMConst implements ASMOperand {
 
+	private int val;
+	
 	public ASMConst(int i) {
+		this.val = i;
 	}
 
 	@Override
 	public void appendToBuilder(StringBuilder buff) {
-		// TODO Auto-generated method stub
-		//TODO do
+		buff.append('$').append(val);
 	}
-
 }

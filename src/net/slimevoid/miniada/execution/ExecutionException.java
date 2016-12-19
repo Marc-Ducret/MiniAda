@@ -9,4 +9,9 @@ public class ExecutionException extends Exception {
 	public ExecutionException(String message) {
 		this.message = message;
 	}
+	
+	@Override
+	public String getMessage() {
+		return message;
+	}
 }

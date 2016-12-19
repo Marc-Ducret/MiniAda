@@ -10,6 +10,8 @@ import java.util.List;
 
 import net.slimevoid.miniada.TokenList.OutOfBoundsException;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ExecutionException;
+import net.slimevoid.miniada.execution.RemoteExecuter;
 import net.slimevoid.miniada.syntax.MatchException;
 import net.slimevoid.miniada.syntax.SourceFile;
 import net.slimevoid.miniada.token.EOF;
@@ -61,7 +63,8 @@ public class Compiler {
 				System.err.println("No source file specified");
 				System.exit(-1);
 			}
-			comp.compile(new File(source), pass, 1);
+			if(comp.compile(new File(source), pass, 1)) System.exit(0);
+			else System.exit(1);
 		} catch(Exception e) {
 			System.err.println("Unhandeled exception:");
 			e.printStackTrace();
@@ -89,6 +92,7 @@ public class Compiler {
 		boolean debug = verbose > 1;
 		boolean silent = verbose < 1;
 		long startTime = System.nanoTime();
+		String asm = null;
 		try {
 			if(maxPass >= PASS_LEX) {
 				TokenList toks = lexicalAnalysis(file, debug);
@@ -97,7 +101,7 @@ public class Compiler {
 					if(maxPass >= PASS_TYP) {
 						typeAnalysis(src, debug);
 						if(maxPass >= PASS_ASM) {
-							out.print(buildAsm(src, debug));
+							asm = buildAsm(src, debug);
 						}
 					}
 				}
@@ -122,6 +126,29 @@ public class Compiler {
 		long elapsed = (System.nanoTime() - startTime)/1000000;
 		if(!silent)
 			System.out.println("Successful compilation in "+elapsed+" ms");
+		if(asm != null) {
+			out.print(asm);
+			if(maxPass >= PASS_EXE) {
+				try {
+					startTime = System.nanoTime();
+					String res = new RemoteExecuter("89.156.241.115", 1337)
+							.execute(asm);
+					elapsed = (System.nanoTime() - startTime)/1000000;
+					if(debug) 
+						System.out.println(res);
+					if(!silent)
+						System.out.println("Execution successful in "
+															+elapsed+"ms");
+					
+				} catch(ExecutionException e) {
+					if(!silent) {
+						System.err.println("Rune time error:");
+						System.err.println(e.getMessage());
+					}
+					if(debug) e.printStackTrace();
+				}
+			}
+		}
 		return true;
 	}
 	

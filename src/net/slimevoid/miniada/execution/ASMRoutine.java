@@ -2,7 +2,7 @@ package net.slimevoid.miniada.execution;
 
 /**
  * Execution scheme:
- * parameters: %rsi, %rdi, stack
+ * parameters: stack
  * return value in %rbx
  * computations with %r(8-15) and stack
  */
