@@ -137,7 +137,8 @@ public class InstructionIf extends Instruction {
 	}
 
 	@Override
-	public void buildAsm(ASMBuilder build) {
+	public void buildAsm(ASMBuilder build, Environment env) {
 		// TODO Auto-generated method stub
+		assert(false);
 	}
 }

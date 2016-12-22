@@ -3,7 +3,8 @@ package net.slimevoid.miniada;
 import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.execution.ASMConst;
 import net.slimevoid.miniada.execution.ASMData;
-import net.slimevoid.miniada.execution.ASMBuilder.Registers;
+import net.slimevoid.miniada.execution.ASMVar;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValuePrimitive;
@@ -28,9 +29,10 @@ public class Library {
 			@Override
 			public void buildASM(ASMBuilder asm) {
 				asm.label(getLabel(asm));
+				asm.mov(new ASMVar(-8, 0), Register.RSI);
 				ASMData msg = asm.registerString("%c");
-				asm.mov(msg, Registers.RDI);
-				asm.mov(new ASMConst(0), Registers.RAX);
+				asm.mov(msg, Register.RDI);
+				asm.mov(new ASMConst(0), Register.RAX);
 				asm.call("printf");
 				asm.ret();
 			}

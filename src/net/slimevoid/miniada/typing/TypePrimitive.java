@@ -18,15 +18,30 @@ public abstract class TypePrimitive extends Type {
 		public Value defaultValue() {
 			return new ValuePrimitive(0);
 		}
+
+		@Override
+		public int size() {
+			return 0x8;
+		}
 	},
 									  BOOLEAN = new TypePrimitive("Boolean"){
 		public Value defaultValue() {
 			return new ValuePrimitive(false);
 		}
+
+		@Override
+		public int size() {
+			return 0x8;
+		}
 	},
 									CHARACTER = new TypePrimitive("Character") {
 		public Value defaultValue() {
 			return new ValuePrimitive(' ');
+		}
+
+		@Override
+		public int size() {
+			return 0x8;
 		}
 	};
 	
@@ -42,6 +57,11 @@ public abstract class TypePrimitive extends Type {
 		
 		public Value defaultValue() {
 			return new ValueAccess(null);
+		}
+
+		@Override
+		public int size() {
+			return 0x8;
 		};
 	};
 	

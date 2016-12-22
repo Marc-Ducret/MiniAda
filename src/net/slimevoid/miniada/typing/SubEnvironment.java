@@ -25,6 +25,20 @@ public class SubEnvironment extends Environment {
 	}
 	
 	@Override
+	public Integer getVarOffset(Identifier id) {
+		Integer off = super.getVarOffset(id);
+		if(off != null) return off;
+		return parent.getVarOffset(id);
+	}
+	
+	@Override
+	public int getVarAnteriority(Identifier id) {
+		Integer off = super.getVarOffset(id);
+		if(off != null) return 0;
+		return parent.getVarAnteriority(id) + 1;
+	}
+	
+	@Override
 	public boolean isTypeDeclared(Identifier id) {
 		return super.isTypeDeclared(id) || parent.isTypeDeclared(id);
 	}

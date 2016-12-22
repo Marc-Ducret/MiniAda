@@ -28,4 +28,9 @@ public class TypeDefined extends Type {
 	public Value defaultValue() {
 		return def.defaultValue();
 	}
+
+	@Override
+	public int size() {
+		return def.size();
+	}
 }

@@ -40,4 +40,6 @@ public abstract class Type {
 	public boolean isDefined() {
 		return true;
 	}
+
+	public abstract int size();
 }

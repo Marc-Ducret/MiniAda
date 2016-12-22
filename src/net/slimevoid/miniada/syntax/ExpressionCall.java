@@ -1,6 +1,7 @@
 package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.typing.Environment;
@@ -56,5 +57,11 @@ public class ExpressionCall extends Expression {
 		for(int i = 0; i < args.length; i++)
 			args[i] = call.exprs[i].value(s);
 		return func.execute(s, args);
+	}
+
+	@Override
+	public void buildAsm(ASMBuilder asm, Environment env) {
+		//TODO impl
+		assert(false);
 	}
 }

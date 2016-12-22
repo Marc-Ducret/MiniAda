@@ -2,6 +2,8 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.TokenList.OutOfBoundsException;
+import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMConst;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValueAccess;
@@ -76,5 +78,19 @@ public class ExpressionConstant extends Expression {
 	public Object valuePrim(Scope s) {
 		if(type != TypePrimitive.NULL) return value;
 		else return super.valuePrim(s);
+	}
+
+	@Override
+	public void buildAsm(ASMBuilder asm, Environment env) {
+		int cst;
+		if(value instanceof Integer)
+			cst = (int) value;
+		else if(value instanceof Character)
+			cst = (int) (char) value;
+		else if(value instanceof Boolean)
+			cst = ((boolean)value) ? 1 : 0;
+		else
+			cst = 0;
+		asm.push(new ASMConst(cst));
 	}
 }

@@ -29,4 +29,9 @@ public class TypeAccess extends Type {
 	public Value defaultValue() {
 		return new ValueAccess(null);
 	}
+
+	@Override
+	public int size() {
+		return 0x8;
+	}
 }

@@ -2,6 +2,7 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValuePrimitive;
@@ -121,4 +122,9 @@ public abstract class Expression extends SyntaxNode implements Typeable {
 	public int valueInt(Scope s) {
 		return (int) valuePrim(s);
 	}
+	
+	/**
+	 * Writes ASM to put expression value on top of stack
+	 */
+	public abstract void buildAsm(ASMBuilder asm, Environment env);
 }

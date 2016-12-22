@@ -16,7 +16,7 @@ import net.slimevoid.miniada.typing.TypeException;
 public abstract class Instruction extends SyntaxNode {
 	
 	public abstract void typeCheck(Environment env) throws TypeException;
-	public abstract void buildAsm(ASMBuilder build);
+	public abstract void buildAsm(ASMBuilder build, Environment env);
 	
 	public static Instruction matchInstruction(TokenList toks) 
 			throws MatchException {
@@ -116,8 +116,8 @@ public abstract class Instruction extends SyntaxNode {
 		}
 
 		@Override
-		public void buildAsm(ASMBuilder asm) {
-			for(Instruction instr : instrs) instr.buildAsm(asm);
+		public void buildAsm(ASMBuilder asm, Environment env) {
+			for(Instruction instr : instrs) instr.buildAsm(asm, env);
 		}
 	}
 }

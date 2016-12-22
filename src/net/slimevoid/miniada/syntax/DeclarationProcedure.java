@@ -76,6 +76,10 @@ public class DeclarationProcedure extends Declaration implements ASMRoutine {
 		localEnv = new SubEnvironment(env, null);
 		if(params != null) {
 			for(Param p : params.ps) {
+				Type t = p.type.computeType(localEnv);
+				localEnv.offset(-t.size()*p.ids.size());
+			}
+			for(Param p : params.ps) {
 				for(Identifier id : p.ids)
 					localEnv.registerVar(id);
 				Type t = p.type.computeType(localEnv);
@@ -88,6 +92,7 @@ public class DeclarationProcedure extends Declaration implements ASMRoutine {
 		}
 		this.pars = pars.toArray(new Par[pars.size()]);
 		env.registerProcedure(this);
+		localEnv.offset(16); //TODO check
 		for(Declaration decl : decls) decl.typeDeclaration(localEnv);
 		if(decls.length > 0) localEnv.checkDefinitions(decls[decls.length-1]);
 		instrs.typeCheck(localEnv);
@@ -105,7 +110,7 @@ public class DeclarationProcedure extends Declaration implements ASMRoutine {
 	@Override
 	public void buildASM(ASMBuilder asm) {
 		asm.label(getLabel(asm));
-		instrs.buildAsm(asm);
+		instrs.buildAsm(asm, localEnv);
 		asm.ret();
 	}
 	

@@ -10,7 +10,7 @@ public class ASMBuilder {
 	private static final String[] dataNames = new String[]{"train", "car", 
 			"plane", "dice", "mushroom", "tree", "flower"};
 	
-	public static enum Registers implements ASMOperand {
+	public static enum Register implements ASMOperand {
 		RAX, RBX, RCX, RDX, RBP, RSP, RSI, RDI,
 		R8, R9, R10, R11, R12, R13, R14, R15;
 
@@ -18,9 +18,21 @@ public class ASMBuilder {
 		public void appendToBuilder(StringBuilder buff) {
 			buff.append('%').append(this.name().toLowerCase());
 		}
+
+		@Override
+		public void pre(ASMBuilder asm) {
+		}
+
+		@Override
+		public void post(ASMBuilder asm) {
+		}
 	}
 	
-	private int labelId = 0;
+	private Register[] tmpRegs = new Register[]{Register.R8 , Register.R9 , Register.R10, Register.R11,
+												Register.R12, Register.R13, Register.R14, Register.R15};
+	private boolean[] tmpRegUsage = new boolean[tmpRegs.length];
+	
+	private int labelId = -1;
 	private int dataId = 0;
 	
 	private StringBuilder txt;
@@ -51,17 +63,23 @@ public class ASMBuilder {
 	}
 	
 	private void binaryInstr(String name, ASMOperand from, ASMOperand to) {
+		from.pre(this);
+		to.pre(this);
 		txt.append('\t').append(name).append(' ');
 		from.appendToBuilder(txt);
 		txt.append(", ");
 		to.appendToBuilder(txt);
 		txt.append('\n');
+		from.post(this);
+		to.post(this);
 	}
 	
 	private void unaryInstr(String name, ASMOperand op) {
+		op.pre(this);
 		txt.append('\t').append(name).append(' ');
 		op.appendToBuilder(txt);
 		txt.append('\n');
+		op.post(this);
 	}
 	
 	private void arglessInstr(String name) {
@@ -70,6 +88,14 @@ public class ASMBuilder {
 	
 	public void mov(ASMOperand from, ASMOperand to) {
 		binaryInstr("mov", from, to);
+	}
+	
+	public void sub(ASMOperand from, ASMOperand to) {
+		binaryInstr("sub", from, to);
+	}
+	
+	public void add(ASMOperand from, ASMOperand to) {
+		binaryInstr("add", from, to);
 	}
 	
 	public void push(ASMOperand op) {
@@ -87,11 +113,30 @@ public class ASMBuilder {
 	public ASMData registerString(String str) {
 		ASMData d = new ASMData(newDataName());
 		data.append(d.name).append(":\n\t.string \"").append(str)
-			.append("\"\n'");
+			.append("\"\n");
 		return d;
 	}
 	
+	public Register getTmpReg() {
+		for(int i = 0; i < tmpRegs.length; i ++) {
+			if(!tmpRegUsage[i]) {
+				tmpRegUsage[i] = true;
+				return tmpRegs[i];
+			}
+		}
+		throw new RuntimeException("No tempoary register free");
+	}
+	
+	public void freeTempRegister(Register reg) {
+		for(int i = 0; i < tmpRegs.length; i++)
+			if(tmpRegs[i] == reg) tmpRegUsage[i] = false;
+	}
+	
 	public String newLabel() {
+		if(labelId < 0) {
+			labelId = 0;
+			return "main";
+		}
 		int id = labelId++;
 		int n = labels.length;
 		if(id >= n) return labels[id % n] + '_' + (id / n);

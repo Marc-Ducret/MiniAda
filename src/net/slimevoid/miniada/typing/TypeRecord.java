@@ -50,4 +50,12 @@ public class TypeRecord extends Type {
 			vals[i] = mems[i].type.defaultValue();
 		return new ValueRecord(vals);
 	}
+
+	@Override
+	public int size() {
+		int s = 0;
+		for(Member m : mems)
+			s += m.type.size();
+		return s;
+	}
 }

@@ -4,7 +4,7 @@ import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.execution.ASMConst;
-import net.slimevoid.miniada.execution.ASMBuilder.Registers;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
@@ -75,12 +75,18 @@ public class InstructionCall extends Instruction {
 	}
 
 	@Override
-	public void buildAsm(ASMBuilder asm) {
+	public void buildAsm(ASMBuilder asm, Environment env) {
 		//TODO finish
-		Expression e = call.exprs[0];
-		ExpressionConstant c = (ExpressionConstant) e;
-		asm.mov(new ASMConst((int) (char) c.value), Registers.RSI);
+		int size = 0;
+		for(Expression e : call.exprs) {
+			e.buildAsm(asm, env);
+			size += e.getComputedType().size();
+		}
+		asm.push(Register.RBP);
+		asm.mov(Register.RSP, Register.RBP);
 		asm.call(proc.getLabel(asm));
+		asm.pop(Register.RBP);
 		asm.planBuild(proc);
+		if(size > 0) asm.add(new ASMConst(size), Register.RSP);
 	}
 }

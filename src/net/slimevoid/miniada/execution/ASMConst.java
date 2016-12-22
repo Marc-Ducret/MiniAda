@@ -12,4 +12,12 @@ public class ASMConst implements ASMOperand {
 	public void appendToBuilder(StringBuilder buff) {
 		buff.append('$').append(val);
 	}
+
+	@Override
+	public void pre(ASMBuilder asm) {
+	}
+
+	@Override
+	public void post(ASMBuilder asm) {
+	}
 }

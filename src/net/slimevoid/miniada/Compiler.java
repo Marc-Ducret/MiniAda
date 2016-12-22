@@ -127,7 +127,7 @@ public class Compiler {
 		if(!silent)
 			System.out.println("Successful compilation in "+elapsed+" ms");
 		if(asm != null) {
-			out.print(asm);
+			if(debug) System.out.println(asm+"\n=== EXE ===");
 			if(maxPass >= PASS_EXE) {
 				try {
 					startTime = System.nanoTime();

@@ -1,6 +1,7 @@
 package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.typing.Environment;
 import net.slimevoid.miniada.typing.Type;
@@ -50,5 +51,11 @@ public class ExpressionUnOperator extends Expression {
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public void buildAsm(ASMBuilder asm, Environment env) {
+		//TODO impl
+		assert(false);		
 	}
 }

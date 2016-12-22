@@ -2,6 +2,7 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValueAccess;
@@ -52,5 +53,11 @@ public class ExpressionNew extends Expression {
 	@Override
 	public Value value(Scope s) {
 		return new ValueAccess(record.defaultValue());
+	}
+
+	@Override
+	public void buildAsm(ASMBuilder asm, Environment env) {
+		//TODO impl
+		assert(false);
 	}
 }

@@ -87,8 +87,9 @@ public class InstructionAssign extends Instruction {
 	}
 
 	@Override
-	public void buildAsm(ASMBuilder asm) {
+	public void buildAsm(ASMBuilder asm, Environment env) {
 		// TODO Auto-generated method stub
+		assert(false);
 		
 	}
 }

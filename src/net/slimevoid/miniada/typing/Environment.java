@@ -14,7 +14,10 @@ public class Environment {
 	
 	public static enum NameSpace {VAR, TYPE, FUNC, PROC};
 	
+	private int curOffset = 0;
+	
 	private Map<String, Type> varTypes = new HashMap<>();
+	private Map<String, Integer> varOffsets = new HashMap<>();
 	private Map<String, Boolean> restrictAlter = new HashMap<>();
 	private Map<String, TypeDefined> types = new HashMap<>();
 	private Map<String, DeclarationFunction> functions = new HashMap<>();
@@ -34,6 +37,18 @@ public class Environment {
 			throw new TypeException(id, "Variable "+id+" cannot be used here");
 		}
 		return varTypes.get(id.name.toLowerCase());
+	}
+	
+	public void offset(int off) {
+		curOffset += off;
+	}
+	
+	public Integer getVarOffset(Identifier id) {
+		return varOffsets.get(id.name.toLowerCase());
+	}
+	
+	public int getVarAnteriority(Identifier id) {
+		return 0;
 	}
 	
 	public Type getType(Identifier id) throws TypeException {
@@ -80,6 +95,8 @@ public class Environment {
 	
 	public void setVarType(Identifier name, Type type) {
 		varTypes.put(name.name.toLowerCase(), type);
+		varOffsets.put(name.name.toLowerCase(), curOffset);
+		curOffset += type.size();
 	}
 	
 	public void registerProcedure(DeclarationProcedure proc)
