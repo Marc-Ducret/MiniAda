@@ -2,6 +2,10 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
+import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
+import net.slimevoid.miniada.execution.ASMMem;
+import net.slimevoid.miniada.execution.ASMVar;
 import net.slimevoid.miniada.token.Identifier;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
 import net.slimevoid.miniada.token.Yytoken;
@@ -21,6 +25,7 @@ public class Access extends SyntaxNode implements Typeable {
 	public DeclarationFunction func;
 	
 	public boolean alterable;
+	public int offset;
 	
 	private Access(Identifier id, Yytoken fst, Yytoken lst) {
 		this(id, null, fst, lst);
@@ -83,6 +88,19 @@ public class Access extends SyntaxNode implements Typeable {
 		alterable = from.isAlterable() || alterable;
 		if(!rec.hasMember(id.name))
 			throw new TypeException(id, typeName+" has no field "+id);
+		offset = rec.getMemberOffset(id.name);
 		return rec.getMemberType(id.name);
+	}
+	
+	public ASMMem getAsmOperand(ASMBuilder asm, Environment env) {
+		assert(alterable);
+		if(from != null) {
+			if(from.getComputedType().isAccess()) {
+				Register r = asm.getTmpReg();
+				// TODO....
+			}
+		}
+		assert(func == null); //TODO deal with funcs
+		return new ASMVar(id, env);
 	}
 }

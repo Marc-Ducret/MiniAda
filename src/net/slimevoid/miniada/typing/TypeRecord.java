@@ -8,10 +8,12 @@ public class TypeRecord extends Type {
 	public static class Member {
 		public final String name;
 		public final Type type;
+		public final int offset;
 		
-		public Member(String name, Type type) {
+		public Member(String name, Type type, int offset) {
 			this.name = name;
 			this.type = type;
+			this.offset = offset;
 		}
 	}
 	
@@ -34,6 +36,13 @@ public class TypeRecord extends Type {
 			if(mem.name.equalsIgnoreCase(id)) return mem.type;
 		}
 		return null;
+	}
+	
+	public int getMemberOffset(String id) {
+		for(Member mem : mems) {
+			if(mem.name.equalsIgnoreCase(id)) return mem.offset;
+		}
+		throw new RuntimeException("No member "+id);
 	}
 	
 	public int getMemberNumber(String id) {

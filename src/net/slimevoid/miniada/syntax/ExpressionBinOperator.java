@@ -2,7 +2,9 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
+import net.slimevoid.miniada.syntax.Operator.OperatorType;
 import net.slimevoid.miniada.typing.Environment;
 import net.slimevoid.miniada.typing.Type;
 import net.slimevoid.miniada.typing.TypeException;
@@ -92,7 +94,40 @@ public class ExpressionBinOperator extends Expression {
 
 	@Override
 	public void buildAsm(ASMBuilder asm, Environment env) {
-		//TODO impl
-		assert(false);
+		eL.buildAsm(asm, env);
+		if(op.type == OperatorType.AND_THEN || op.type == OperatorType.OR_ELSE) {
+			throw new RuntimeException("not impl"); //TODO impl 
+		} else {
+			eR.buildAsm(asm, env);
+			if(op.type == OperatorType.EQ || op.type == OperatorType.NEQ) {
+				throw new RuntimeException("not impl"); //TODO impl 
+			} else if(op.type == OperatorType.DIVIDE){
+				throw new RuntimeException("not impl");//TODO impl 
+			} else {
+				String instr = null;
+				switch(op.type) {
+				case AND: 		instr = "and"; 	break;
+				case OR:		instr = "or"; 	break;
+				case GE:		instr = "?"; 	break;//TODO ??
+				case GT:		instr = "?"; 	break;
+				case LE:		instr = "?"; 	break;
+				case LT:		instr = "?"; 	break;
+				case MINUS:		instr = "sub"; 	break;
+				case PLUS:		instr = "add"; 	break;
+				case REM:		instr = "or"; 	break;
+				case TIMES:		instr = "imul"; 	break;
+				default:
+					break;
+				}
+				Register rL = asm.getTmpReg();
+				Register rR = asm.getTmpReg();
+				asm.pop(rR);
+				asm.pop(rL);
+				asm.binaryInstr(instr, rR, rL);
+				asm.push(rL);
+				asm.freeTempRegister(rL);
+				asm.freeTempRegister(rR);
+			}
+		}
 	}
 }

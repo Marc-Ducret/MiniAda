@@ -108,6 +108,7 @@ public class DeclarationType extends Declaration {
 		public Type buildDef(Environment env, Type type)
 				throws TypeException {
 			List<Member> mems = new ArrayList<>();
+			int off = 0;
 			for(Fields f : fields)
 				for(Identifier id : f.ids) {
 					for(Member m : mems)
@@ -121,7 +122,8 @@ public class DeclarationType extends Declaration {
 							"modifier");
 					if(!t.isDefined()) throw new TypeException(id,
 							"Type "+t+" is undefined");
-					mems.add(new Member(id.name, t));
+					mems.add(new Member(id.name, t, off));
+					off += t.size();
 				}
 			return new TypeRecord(mems.toArray(new Member[mems.size()]));
 		}

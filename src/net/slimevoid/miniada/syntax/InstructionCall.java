@@ -76,7 +76,6 @@ public class InstructionCall extends Instruction {
 
 	@Override
 	public void buildAsm(ASMBuilder asm, Environment env) {
-		//TODO finish
 		int size = 0;
 		for(Expression e : call.exprs) {
 			e.buildAsm(asm, env);

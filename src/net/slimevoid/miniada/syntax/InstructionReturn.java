@@ -69,8 +69,8 @@ public class InstructionReturn extends Instruction {
 	}
 
 	@Override
-	public void buildAsm(ASMBuilder build, Environment env) {
-		// TODO Auto-generated method stub
-		assert(false);
+	public void buildAsm(ASMBuilder asm, Environment env) {
+		ret.buildAsm(asm, env);
+		asm.pop(env.returnLoc);
 	}
 }

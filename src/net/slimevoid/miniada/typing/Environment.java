@@ -3,6 +3,7 @@ package net.slimevoid.miniada.typing;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.slimevoid.miniada.execution.ASMMem;
 import net.slimevoid.miniada.syntax.DeclarationFunction;
 import net.slimevoid.miniada.syntax.DeclarationProcedure;
 import net.slimevoid.miniada.syntax.NativeFunction;
@@ -25,6 +26,7 @@ public class Environment {
 	private Map<String, NameSpace> nameSpaces = new HashMap<>();
 	
 	public final Type expectedReturn;
+	public ASMMem returnLoc;
 	
 	public Environment(Type expectedReturn) {
 		this.expectedReturn = expectedReturn;
@@ -174,5 +176,9 @@ public class Environment {
 	
 	public NameSpace getNameSpace(Identifier id) {
 		return nameSpaces.get(id.name.toLowerCase());
+	}
+
+	public int getOffset() {
+		return curOffset;
 	}
 }

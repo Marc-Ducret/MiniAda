@@ -2,6 +2,8 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMConst;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.typing.Environment;
@@ -61,7 +63,17 @@ public class ExpressionCall extends Expression {
 
 	@Override
 	public void buildAsm(ASMBuilder asm, Environment env) {
-		//TODO impl
-		assert(false);
+		asm.sub(new ASMConst(func.retType.size()), Register.RSP);
+		int size = 0;
+		for(Expression e : call.exprs) {
+			e.buildAsm(asm, env);
+			size += e.getComputedType().size();
+		}
+		asm.push(Register.RBP);
+		asm.mov(Register.RSP, Register.RBP);
+		asm.call(func.getLabel(asm));
+		asm.pop(Register.RBP);
+		asm.planBuild(func);
+		if(size > 0) asm.add(new ASMConst(size), Register.RSP);
 	}
 }

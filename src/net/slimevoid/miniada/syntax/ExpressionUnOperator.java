@@ -56,6 +56,6 @@ public class ExpressionUnOperator extends Expression {
 	@Override
 	public void buildAsm(ASMBuilder asm, Environment env) {
 		//TODO impl
-		assert(false);		
+		throw new RuntimeException("not impl");	
 	}
 }

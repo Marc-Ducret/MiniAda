@@ -6,7 +6,9 @@ import java.util.List;
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMConst;
 import net.slimevoid.miniada.execution.ASMRoutine;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.SubScope;
 import net.slimevoid.miniada.interpert.Value;
@@ -92,7 +94,7 @@ public class DeclarationProcedure extends Declaration implements ASMRoutine {
 		}
 		this.pars = pars.toArray(new Par[pars.size()]);
 		env.registerProcedure(this);
-		localEnv.offset(16); //TODO check
+		localEnv.offset(16);
 		for(Declaration decl : decls) decl.typeDeclaration(localEnv);
 		if(decls.length > 0) localEnv.checkDefinitions(decls[decls.length-1]);
 		instrs.typeCheck(localEnv);
@@ -110,7 +112,9 @@ public class DeclarationProcedure extends Declaration implements ASMRoutine {
 	@Override
 	public void buildASM(ASMBuilder asm) {
 		asm.label(getLabel(asm));
+		asm.sub(new ASMConst(localEnv.getOffset()-16), Register.RSP); //TODO check
 		instrs.buildAsm(asm, localEnv);
+		asm.add(new ASMConst(localEnv.getOffset()-16), Register.RSP); //TODO check
 		asm.ret();
 	}
 	

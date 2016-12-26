@@ -75,6 +75,6 @@ public class InstructionWhile extends Instruction {
 	@Override
 	public void buildAsm(ASMBuilder build, Environment env) {
 		// TODO Auto-generated method stub
-		assert(false);
+		throw new RuntimeException("not impl");
 	}
 }

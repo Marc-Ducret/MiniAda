@@ -6,7 +6,10 @@ import java.util.List;
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMConst;
+import net.slimevoid.miniada.execution.ASMMem;
 import net.slimevoid.miniada.execution.ASMRoutine;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.SubScope;
 import net.slimevoid.miniada.interpert.Value;
@@ -81,6 +84,11 @@ public class DeclarationFunction extends Declaration implements ASMRoutine {
 		localEnv = new SubEnvironment(env, retType);
 		if(params != null) {
 			for(Param p : params.ps) {
+				Type t = p.type.computeType(localEnv);
+				localEnv.offset(-t.size()*p.ids.size());
+			}
+			localEnv.returnLoc = new ASMMem(localEnv.getOffset()-retType.size(), Register.RBP);
+			for(Param p : params.ps) {
 				for(Identifier id : p.ids)
 					localEnv.registerVar(id);
 				Type t = p.type.computeType(localEnv);
@@ -93,6 +101,7 @@ public class DeclarationFunction extends Declaration implements ASMRoutine {
 		}
 		this.pars = pars.toArray(new Par[pars.size()]);
 		env.registerFunction(this);
+		localEnv.offset(16);
 		for(Declaration decl : decls) decl.typeDeclaration(localEnv);
 		if(decls.length > 0) localEnv.checkDefinitions(decls[decls.length-1]);
 		instrs.typeCheck(localEnv);
@@ -112,7 +121,11 @@ public class DeclarationFunction extends Declaration implements ASMRoutine {
 	
 	@Override
 	public void buildASM(ASMBuilder asm) {
-		//TODO impl this
+		asm.label(getLabel(asm));
+		asm.sub(new ASMConst(localEnv.getOffset()-16), Register.RSP); //TODO check
+		instrs.buildAsm(asm, localEnv);
+		asm.add(new ASMConst(localEnv.getOffset()-16), Register.RSP); //TODO check
+		asm.ret();
 	}
 	
 	@Override

@@ -2,7 +2,7 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
-import net.slimevoid.miniada.execution.ASMVar;
+import net.slimevoid.miniada.execution.ASMMem;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValueAccess;
@@ -65,9 +65,10 @@ public class ExpressionAccess extends Expression {
 
 	@Override
 	public void buildAsm(ASMBuilder asm, Environment env) {
-		assert(access.from == null); //TODO deal with from
-		assert(access.func == null); //TODO deal with funcs
-		ASMVar var = new ASMVar(access.id, env);
-		asm.push(var);
+		ASMMem op = access.getAsmOperand(asm, env);
+		for(int i = 0; i < getComputedType().size(); i++) {
+			asm.push(op);
+			op.offset(8);
+		}
 	}
 }

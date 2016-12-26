@@ -28,11 +28,12 @@ public class ASMBuilder {
 		}
 	}
 	
-	private Register[] tmpRegs = new Register[]{Register.R8 , Register.R9 , Register.R10, Register.R11,
-												Register.R12, Register.R13, Register.R14, Register.R15};
+	private Register[] tmpRegs = new Register[]{
+			Register.R8 , Register.R9 , Register.R10, Register.R11,
+			Register.R12, Register.R13, Register.R14, Register.R15};
 	private boolean[] tmpRegUsage = new boolean[tmpRegs.length];
 	
-	private int labelId = -1;
+	private int labelId = 0;
 	private int dataId = 0;
 	
 	private StringBuilder txt;
@@ -62,7 +63,7 @@ public class ASMBuilder {
 		txt.append("\t.globl ").append(label).append('\n');
 	}
 	
-	private void binaryInstr(String name, ASMOperand from, ASMOperand to) {
+	public void binaryInstr(String name, ASMOperand from, ASMOperand to) {
 		from.pre(this);
 		to.pre(this);
 		txt.append('\t').append(name).append(' ');
@@ -74,7 +75,7 @@ public class ASMBuilder {
 		to.post(this);
 	}
 	
-	private void unaryInstr(String name, ASMOperand op) {
+	public void unaryInstr(String name, ASMOperand op) {
 		op.pre(this);
 		txt.append('\t').append(name).append(' ');
 		op.appendToBuilder(txt);
@@ -133,10 +134,6 @@ public class ASMBuilder {
 	}
 	
 	public String newLabel() {
-		if(labelId < 0) {
-			labelId = 0;
-			return "main";
-		}
 		int id = labelId++;
 		int n = labels.length;
 		if(id >= n) return labels[id % n] + '_' + (id / n);

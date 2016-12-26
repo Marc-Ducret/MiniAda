@@ -12,6 +12,7 @@ import net.slimevoid.miniada.TokenList.OutOfBoundsException;
 import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.execution.ExecutionException;
 import net.slimevoid.miniada.execution.RemoteExecuter;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.syntax.MatchException;
 import net.slimevoid.miniada.syntax.SourceFile;
 import net.slimevoid.miniada.token.EOF;
@@ -282,7 +283,11 @@ public class Compiler {
 	private String buildAsm(SourceFile src, boolean debug) {
 		if(debug) System.out.println("== ASM ==");
 		ASMBuilder asm = new ASMBuilder();
-		asm.main(src.dproc.getLabel(asm));
+		asm.main("main");
+		asm.label("main");
+		asm.mov(Register.RSP, Register.RBP);
+		asm.call(src.dproc.getLabel(asm));
+		asm.ret();
 		asm.planBuild(src.dproc);
 		asm.build();
 		return asm.builtAsm();

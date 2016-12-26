@@ -1,10 +1,11 @@
 package net.slimevoid.miniada;
 
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.execution.ASMConst;
 import net.slimevoid.miniada.execution.ASMData;
+import net.slimevoid.miniada.execution.ASMMem;
 import net.slimevoid.miniada.execution.ASMVar;
-import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValuePrimitive;
@@ -50,7 +51,12 @@ public class Library {
 			
 			@Override
 			public void buildASM(ASMBuilder asm) {
-				// TODO Auto-generated method stub
+				asm.label(getLabel(asm));
+				ASMData msg = asm.registerString("\\n");
+				asm.mov(msg, Register.RDI);
+				asm.mov(new ASMConst(0), Register.RAX);
+				asm.call("printf");
+				asm.ret();
 			}
 		};
 		return newline;
@@ -67,7 +73,12 @@ public class Library {
 			
 			@Override
 			public void buildASM(ASMBuilder asm) {
-				// TODO Auto-generated method stub
+				asm.label(getLabel(asm));
+				Register r = asm.getTmpReg();
+				asm.mov(new ASMVar(-8, 0), r);
+				asm.mov(r, new ASMMem(-16, Register.RBP));
+				asm.freeTempRegister(r);
+				asm.ret();
 			}
 		};
 	}
