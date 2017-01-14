@@ -3,7 +3,7 @@ package net.slimevoid.miniada.syntax;
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
-import net.slimevoid.miniada.execution.ASMVar;
+import net.slimevoid.miniada.execution.ASMMem;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValueAccess;
@@ -24,7 +24,7 @@ public class InstructionAssign extends Instruction {
 	@Override
 	public void typeCheck(Environment env) throws TypeException {
 		Type tLeft = access.computeType(env);
-		Type tRight = expr.computeType(env);
+		Type tRight = expr.getType(env);
 		if(!access.alterable)
 			throw new TypeException(access, access+" is not alterable");
 		if(!tRight.canBeCastedInto(tLeft))
@@ -90,6 +90,13 @@ public class InstructionAssign extends Instruction {
 	@Override
 	public void buildAsm(ASMBuilder asm, Environment env) {
 		expr.buildAsm(asm, env);
-		asm.pop(new ASMVar(access.id, env)); //TODO deal with access.from....
+		ASMMem mem = access.getAsmOperand(asm, env);
+		int size = expr.getComputedType().size();
+		mem.offset(size-8);
+		for(int i = 0; i < size/8; i++) {
+			asm.pop(mem);
+			mem.offset(-8);
+		}
+		mem.freeRegister(asm);
 	}
 }

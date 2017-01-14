@@ -46,12 +46,10 @@ public class LinuxExecuter extends Executer {
 			return res;
 		} catch (IOException e) {
 			e.printStackTrace();
-			//TODO handle
+			throw new ExecutionException("IOException "+e.getMessage()); 
 		} catch (InterruptedException e) {
-			// TODO ?
-			e.printStackTrace();
+			throw new ExecutionException("InterruptedException "+e.getMessage()); 
 		}
-		return null;
 	}
 	
 	public static void main(String[] args) throws IOException, ExecutionException {

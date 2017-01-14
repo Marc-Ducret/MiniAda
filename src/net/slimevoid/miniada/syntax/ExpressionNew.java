@@ -3,6 +3,9 @@ package net.slimevoid.miniada.syntax;
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMConst;
+import net.slimevoid.miniada.execution.ASMMem;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValueAccess;
@@ -57,7 +60,8 @@ public class ExpressionNew extends Expression {
 
 	@Override
 	public void buildAsm(ASMBuilder asm, Environment env) {
-		//TODO impl
-		throw new RuntimeException("not impl");
+		asm.push(new ASMConst(record.size()));
+		asm.call("malloc");
+		asm.mov(Register.RAX, new ASMMem(0, Register.RSP));
 	}
 }

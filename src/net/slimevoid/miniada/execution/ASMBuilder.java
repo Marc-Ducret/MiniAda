@@ -58,7 +58,10 @@ public class ASMBuilder {
 		txt.append("\tjmp ").append(label).append('\n');
 	}
 	
-
+	public void jz(String label) {
+		txt.append("\tjz ").append(label).append('\n');
+	}
+	
 	public void main(String label) {
 		txt.append("\t.globl ").append(label).append('\n');
 	}
@@ -99,6 +102,10 @@ public class ASMBuilder {
 		binaryInstr("add", from, to);
 	}
 	
+	public void test(ASMOperand from, ASMOperand to) {
+		binaryInstr("test", from, to);
+	}
+	
 	public void push(ASMOperand op) {
 		unaryInstr("push", op);
 	}
@@ -109,6 +116,11 @@ public class ASMBuilder {
 	
 	public void ret() {
 		arglessInstr("ret");
+	}
+	
+	public void comment(String line) {
+		//TODO no debug mode
+		if(!line.contains("\n")) txt.append("\t# ").append(line).append('\n');
 	}
 	
 	public ASMData registerString(String str) {

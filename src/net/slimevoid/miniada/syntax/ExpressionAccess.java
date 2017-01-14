@@ -2,7 +2,10 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMConst;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.execution.ASMMem;
+import net.slimevoid.miniada.execution.ASMVar;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValueAccess;
@@ -65,10 +68,34 @@ public class ExpressionAccess extends Expression {
 
 	@Override
 	public void buildAsm(ASMBuilder asm, Environment env) {
-		ASMMem op = access.getAsmOperand(asm, env);
-		for(int i = 0; i < getComputedType().size(); i++) {
-			asm.push(op);
-			op.offset(8);
+		if(access.from != null) {
+			access.from.buildAsm(asm, env);
+			if(access.from.getComputedType().isAccess()) {
+				Register r = asm.getTmpReg();
+				asm.pop(r);
+				int sF = this.getComputedType().size();
+				ASMMem from = new ASMMem(access.offset, r);
+				for(int i = 0; i < sF/8; i ++) {
+					asm.push(from);
+					from.offset(8);
+				}
+				asm.freeTempRegister(r);
+			} else {
+				int sR = access.from.getComputedType().size();
+				int sF = this.getComputedType().size();
+				asm.add(new ASMConst(sR), Register.RSP);
+				ASMMem from = new ASMMem(access.offset+8, Register.RSP);
+				for(int i = 0; i < sF/8; i ++) {
+					asm.push(from);
+				}
+			}
+		} else {
+			assert(access.func == null);
+			ASMVar from = new ASMVar(access.id, env);
+			for(int i = 0; i < this.getComputedType().size()/8; i ++) {
+				asm.push(from);
+				from.offset(8);
+			}
 		}
 	}
 }

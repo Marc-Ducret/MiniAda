@@ -28,4 +28,8 @@ public class ASMMem implements ASMOperand {
 	public void offset(int off) {
 		offset += off;
 	}
+	
+	public void freeRegister(ASMBuilder asm) {
+		asm.freeTempRegister(ref);
+	}
 }

@@ -3,6 +3,7 @@ package net.slimevoid.miniada.syntax;
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Keyword;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
@@ -73,8 +74,18 @@ public class InstructionWhile extends Instruction {
 	}
 
 	@Override
-	public void buildAsm(ASMBuilder build, Environment env) {
-		// TODO Auto-generated method stub
-		throw new RuntimeException("not impl");
+	public void buildAsm(ASMBuilder asm, Environment env) {
+		String end = asm.newLabel();
+		String start = asm.newLabel();
+		asm.label(start);
+		cond.buildAsm(asm, env);
+		Register r = asm.getTmpReg();
+		asm.pop(r);
+		asm.test(r, r);
+		asm.freeTempRegister(r);
+		asm.jz(end);
+		block.buildAsm(asm, env);
+		asm.jmp(start);
+		asm.label(end);
 	}
 }
