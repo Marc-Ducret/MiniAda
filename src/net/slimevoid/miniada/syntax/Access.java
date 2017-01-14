@@ -61,7 +61,7 @@ public class Access extends SyntaxNode implements Typeable {
 	}
 
 	@Override
-	public Type computeType(Environment env) throws TypeException {
+	public Type getType(Environment env) throws TypeException {
 		alterable = false;
 		if(from == null) {
 			try {
@@ -96,16 +96,15 @@ public class Access extends SyntaxNode implements Typeable {
 		assert(alterable);
 		if(from != null) {
 			if(from.getComputedType().isAccess()) {
-				assert(false);
-				Register r = asm.getTmpReg(); //TODO fix register leak
+				Register r = asm.getTmpReg();
 				from.buildAsm(asm, env);
 				asm.pop(r);
-				return new ASMMem(offset, r);
+				return new ASMMem(-offset, r);
 			}
 			assert(from instanceof ExpressionAccess);
 			Access a = ((ExpressionAccess) from).access;
 			ASMMem mem = a.getAsmOperand(asm, env);
-			mem.offset(offset);
+			mem.offset(-offset);
 			return mem;
 		}
 		assert(func == null); //TODO deal with funcs

@@ -9,6 +9,7 @@ import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.execution.ASMConst;
 import net.slimevoid.miniada.execution.ASMMem;
 import net.slimevoid.miniada.execution.ASMRoutine;
+import net.slimevoid.miniada.execution.ASMVar;
 import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.SubScope;
@@ -80,18 +81,18 @@ public class DeclarationFunction extends Declaration implements ASMRoutine {
 	public void typeDeclaration(Environment env) throws TypeException {
 		env.checkDefinitions(this);
 		List<Par> pars = new ArrayList<>();
-		retType = ret.computeType(env);
+		retType = ret.getType(env);
 		localEnv = new SubEnvironment(env, retType);
 		if(params != null) {
 			for(Param p : params.ps) {
-				Type t = p.type.computeType(localEnv);
+				Type t = p.type.getType(localEnv);
 				localEnv.offset(-t.size()*p.ids.size());
 			}
 			localEnv.returnLoc = new ASMMem(localEnv.getOffset()-retType.size(), Register.RBP);
 			for(Param p : params.ps) {
 				for(Identifier id : p.ids)
 					localEnv.registerVar(id);
-				Type t = p.type.computeType(localEnv);
+				Type t = p.type.getType(localEnv);
 				for(Identifier id : p.ids) {
 					pars.add(new Par(id, t, p.mode.isOut));
 					localEnv.setVarType(id, t);
@@ -122,7 +123,25 @@ public class DeclarationFunction extends Declaration implements ASMRoutine {
 	@Override
 	public void buildASM(ASMBuilder asm) {
 		asm.label(getLabel(asm));
+		asm.comment("func "+name);
 		asm.sub(new ASMConst(localEnv.getOffset()-Compiler.WORD*2), Register.RSP);
+		for(Declaration decl : decls) {
+			if(decl instanceof DeclarationVariable) {
+				DeclarationVariable dv = (DeclarationVariable)decl;
+				if(dv.init != null) {
+					for(Identifier id : dv.ids) {
+						dv.init.buildAsm(asm, localEnv);
+						ASMMem var = new ASMVar(id, localEnv);
+						int size = dv.init.getComputedType().size();
+						var.offset(size-Compiler.WORD);
+						for(int i = 0; i < size/Compiler.WORD; i++) {
+							asm.pop(var);
+							var.offset(-Compiler.WORD);
+						}
+					}
+				}
+			}
+		}
 		instrs.buildAsm(asm, localEnv);
 		asm.add(new ASMConst(localEnv.getOffset()-Compiler.WORD*2), Register.RSP);
 		asm.ret();

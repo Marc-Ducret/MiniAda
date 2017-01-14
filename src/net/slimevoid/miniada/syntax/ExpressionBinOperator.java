@@ -126,8 +126,14 @@ public class ExpressionBinOperator extends Expression {
 				asm.freeTempRegister(rA);
 				asm.freeTempRegister(rB);
 				asm.freeTempRegister(res);
-			} else if(op.type == OperatorType.DIVIDE){
-				throw new RuntimeException("not impl");//TODO impl 
+			} else if(op.type == OperatorType.DIVIDE || op.type == OperatorType.REM){
+				Register r = asm.getTmpReg();
+				asm.pop(r);
+				asm.pop(Register.RAX);
+				asm.mov(new ASMConst(0), Register.RDX);
+				asm.unaryInstr("div", r);
+				asm.push(op.type == OperatorType.REM ? Register.RDX : Register.RAX);
+				asm.freeTempRegister(r);
 			} else {
 				String instr = null;
 				switch(op.type) {
@@ -139,7 +145,6 @@ public class ExpressionBinOperator extends Expression {
 				case LT:		instr = "cmp";	break;
 				case MINUS:		instr = "sub"; 	break;
 				case PLUS:		instr = "add"; 	break;
-				case REM:		instr = "?"; 	break;
 				case TIMES:		instr = "imul";	break;
 				default:
 					break;

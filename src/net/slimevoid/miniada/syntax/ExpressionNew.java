@@ -5,6 +5,7 @@ import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.execution.ASMConst;
 import net.slimevoid.miniada.execution.ASMMem;
+import net.slimevoid.miniada.execution.ASMVar;
 import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
@@ -60,8 +61,8 @@ public class ExpressionNew extends Expression {
 
 	@Override
 	public void buildAsm(ASMBuilder asm, Environment env) {
-		asm.push(new ASMConst(record.size()));
-		asm.call("malloc");
-		asm.mov(Register.RAX, new ASMMem(0, Register.RSP));
+		asm.mov(new ASMConst(record.size()) , Register.RDI);
+		asm.call("sbrk");
+		asm.push(Register.RAX);
 	}
 }

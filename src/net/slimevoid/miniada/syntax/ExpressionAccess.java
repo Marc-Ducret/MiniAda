@@ -35,7 +35,7 @@ public class ExpressionAccess extends Expression {
 
 	@Override
 	public Type computeType(Environment env) throws TypeException {
-		return access.computeType(env);
+		return access.getType(env);
 	}
 	
 	@Override
@@ -75,10 +75,10 @@ public class ExpressionAccess extends Expression {
 				Register r = asm.getTmpReg();
 				asm.pop(r);
 				int sF = this.getComputedType().size();
-				ASMMem from = new ASMMem(access.offset, r);
+				ASMMem from = new ASMMem(-access.offset, r);
 				for(int i = 0; i < sF/Compiler.WORD; i ++) {
 					asm.push(from);
-					from.offset(Compiler.WORD);
+					from.offset(-Compiler.WORD);
 				}
 				asm.freeTempRegister(r);
 			} else {

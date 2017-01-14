@@ -23,7 +23,7 @@ public class InstructionAssign extends Instruction {
 	
 	@Override
 	public void typeCheck(Environment env) throws TypeException {
-		Type tLeft = access.computeType(env);
+		Type tLeft = access.getType(env);
 		Type tRight = expr.getType(env);
 		if(!access.alterable)
 			throw new TypeException(access, access+" is not alterable");

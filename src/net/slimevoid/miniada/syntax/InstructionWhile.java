@@ -53,7 +53,7 @@ public class InstructionWhile extends Instruction {
 
 	@Override
 	public void typeCheck(Environment env) throws TypeException {
-		Type t = cond.computeType(env);
+		Type t = cond.getType(env);
 		if(!t.canBeCastedInto(TypePrimitive.BOOLEAN))
 			throw new TypeException(cond, 
 					"Expected type Boolean while expression has type "+t);

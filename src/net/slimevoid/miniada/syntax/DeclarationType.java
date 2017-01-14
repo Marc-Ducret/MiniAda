@@ -116,7 +116,7 @@ public class DeclarationType extends Declaration {
 							throw new TypeException(id, 
 									"A field in this record is already "+
 									"nammed "+id);
-					Type t = f.type.computeType(env);
+					Type t = f.type.getType(env);
 					if(t == type) throw new TypeException(id,
 							"Field can't be of type "+type+" without access "+
 							"modifier");

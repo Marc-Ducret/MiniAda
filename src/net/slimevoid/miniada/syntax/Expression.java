@@ -95,11 +95,14 @@ public abstract class Expression extends SyntaxNode implements Typeable {
 		return type.isAccess();
 	}
 	
+	@Override
 	public Type getType(Environment env) throws TypeException {
 		if(!computedType) type = computeType(env);
 		computedType = true;
 		return type;
 	}
+	
+	public abstract Type computeType(Environment env)  throws TypeException;	
 	
 	public Type getComputedType() {
 		assert(computedType);

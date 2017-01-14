@@ -46,7 +46,6 @@ public class Environment {
 	}
 	
 	public Integer getVarOffset(Identifier id) {
-		assert(varOffsets.containsKey(id.name.toLowerCase()));
 		return varOffsets.get(id.name.toLowerCase());
 	}
 	

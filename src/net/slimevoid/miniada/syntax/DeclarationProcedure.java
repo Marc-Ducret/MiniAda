@@ -7,7 +7,9 @@ import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.execution.ASMConst;
+import net.slimevoid.miniada.execution.ASMMem;
 import net.slimevoid.miniada.execution.ASMRoutine;
+import net.slimevoid.miniada.execution.ASMVar;
 import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.SubScope;
@@ -78,13 +80,13 @@ public class DeclarationProcedure extends Declaration implements ASMRoutine {
 		localEnv = new SubEnvironment(env, null);
 		if(params != null) {
 			for(Param p : params.ps) {
-				Type t = p.type.computeType(localEnv);
+				Type t = p.type.getType(localEnv);
 				localEnv.offset(-t.size()*p.ids.size());
 			}
 			for(Param p : params.ps) {
 				for(Identifier id : p.ids)
 					localEnv.registerVar(id);
-				Type t = p.type.computeType(localEnv);
+				Type t = p.type.getType(localEnv);
 				for(Identifier id : p.ids) {
 					pars.add(new Par(id, t, p.mode.isOut));
 					localEnv.setVarType(id, t);
@@ -112,7 +114,25 @@ public class DeclarationProcedure extends Declaration implements ASMRoutine {
 	@Override
 	public void buildASM(ASMBuilder asm) {
 		asm.label(getLabel(asm));
+		asm.comment("proc "+name);
 		asm.sub(new ASMConst(localEnv.getOffset()-Compiler.WORD*2), Register.RSP);
+		for(Declaration decl : decls) {
+			if(decl instanceof DeclarationVariable) {
+				DeclarationVariable dv = (DeclarationVariable)decl;
+				if(dv.init != null) {
+					for(Identifier id : dv.ids) {
+						dv.init.buildAsm(asm, localEnv);
+						ASMMem var = new ASMVar(id, localEnv);
+						int size = dv.init.getComputedType().size();
+						var.offset(size-Compiler.WORD);
+						for(int i = 0; i < size/Compiler.WORD; i++) {
+							asm.pop(var);
+							var.offset(-Compiler.WORD);
+						}
+					}
+				}
+			}
+		}
 		instrs.buildAsm(asm, localEnv);
 		asm.add(new ASMConst(localEnv.getOffset()-Compiler.WORD*2), Register.RSP);
 		asm.ret();

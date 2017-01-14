@@ -50,7 +50,7 @@ public class TypeNode extends SyntaxNode implements Typeable {
 	}
 	
 	@Override
-	public Type computeType(Environment env) throws TypeException {
+	public Type getType(Environment env) throws TypeException {
 		if(type == null) type = buildType(env);
 		return type;
 	}

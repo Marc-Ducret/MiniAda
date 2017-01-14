@@ -3,6 +3,9 @@ package net.slimevoid.miniada.syntax;
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMConst;
+import net.slimevoid.miniada.execution.ASMVar;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Identifier;
 import net.slimevoid.miniada.token.Keyword;
@@ -22,6 +25,8 @@ public class InstructionFor extends Instruction {
 	public final Expression from, to;
 	public final boolean reverse;
 	public final InstructionBlock block;
+	
+	private SubEnvironment localEnv;
 	
 	private InstructionFor(Identifier var, Expression from, Expression to,
 			boolean reverse, InstructionBlock block, 
@@ -69,24 +74,24 @@ public class InstructionFor extends Instruction {
 	
 	@Override
 	public String toString() {
-		return "while "+from+" loop "+block+" end loop;";
+		return "for "+var+" in "+from+".."+to+" loop "+block+" end loop;";
 	}
 
 	@Override
-	public void typeCheck(Environment env) throws TypeException {
-		SubEnvironment localEnv = new SubEnvironment(env, env.expectedReturn);
+	public void typeCheck(Environment env) throws TypeException {//TODO check is changes altered typing
+		localEnv = new SubEnvironment(env, env.expectedReturn);
+		Type t = from.getType(env);
+		if(!t.canBeCastedInto(TypePrimitive.INTEGER))
+			throw new TypeException(from, 
+					"Expected type Integer while expression has type "+t);
+		t = to.getType(env);
+		if(!t.canBeCastedInto(TypePrimitive.INTEGER))
+			throw new TypeException(from, 
+					"Expected type Integer while expression has type "+t);
+		localEnv.offset(Compiler.WORD);
 		localEnv.registerVar(var);
-		localEnv.setVarType(var, TypePrimitive.NULL);
-		Type t = from.computeType(localEnv);
-		if(!t.canBeCastedInto(TypePrimitive.INTEGER))
-			throw new TypeException(from, 
-					"Expected type Integer while expression has type "+t);
-		t = to.computeType(localEnv);
-		if(!t.canBeCastedInto(TypePrimitive.INTEGER))
-			throw new TypeException(from, 
-					"Expected type Integer while expression has type "+t);
 		localEnv.setVarType(var, TypePrimitive.INTEGER);
-		localEnv.restricAlteration(var);
+		localEnv.restricAlteration(var); 
 		block.typeCheck(localEnv);
 	}
 
@@ -110,8 +115,35 @@ public class InstructionFor extends Instruction {
 	}
 
 	@Override
-	public void buildAsm(ASMBuilder build, Environment env) {
-		// TODO Auto-generated method stub
-		throw new RuntimeException("not impl");
+	public void buildAsm(ASMBuilder asm, Environment env) {
+		String start = asm.newLabel();
+		String end = asm.newLabel();
+		(reverse ? to : from).buildAsm(asm, env);
+		(reverse ? from : to).buildAsm(asm, env);
+		Register rInit = asm.getTmpReg();
+		Register rBound = asm.getTmpReg();
+		asm.pop(rBound);
+		asm.pop(rInit);
+		asm.push(Register.RBP);
+		asm.mov(Register.RSP, Register.RBP);
+		asm.sub(new ASMConst(localEnv.getOffset()-Compiler.WORD), Register.RSP);
+		asm.push(rBound);
+		ASMVar i = new ASMVar(var, localEnv);
+		asm.mov(rInit, i);
+		asm.freeTempRegister(rInit);
+		asm.freeTempRegister(rBound);
+		asm.label(start);
+		Register r = asm.getTmpReg();
+		asm.pop(r);
+		asm.push(r);
+		asm.cmp(r, i);
+		asm.freeTempRegister(r);
+		asm.jflag(end, reverse ? "l" : "g");
+		block.buildAsm(asm, localEnv);
+		asm.unaryInstr(reverse ? "dec" : "inc", i);
+		asm.jmp(start);
+		asm.label(end);
+		asm.add(new ASMConst(localEnv.getOffset()-Compiler.WORD+Compiler.WORD), Register.RSP);
+		asm.pop(Register.RBP);
 	}
 }

@@ -58,9 +58,9 @@ public class DeclarationVariable extends Declaration {
 	public void typeDeclaration(Environment env) throws TypeException {
 		for(Identifier id : ids)
 			env.registerVar(id);
-		Type t = type.computeType(env);
+		Type t = type.getType(env);
 		if(init != null) {
-			Type tI = init.computeType(env);
+			Type tI = init.getType(env);
 			if(!tI.canBeCastedInto(t))
 				throw new TypeException(init, "Expected type "+t
 										+" while expression has type "+tI);

@@ -28,7 +28,9 @@ public class SubEnvironment extends Environment {
 	public Integer getVarOffset(Identifier id) {
 		Integer off = super.getVarOffset(id);
 		if(off != null) return off;
-		return parent.getVarOffset(id);
+		off = parent.getVarOffset(id);
+		assert(off != null);
+		return off;
 	}
 	
 	@Override

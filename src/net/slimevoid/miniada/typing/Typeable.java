@@ -1,5 +1,5 @@
 package net.slimevoid.miniada.typing;
 
 public interface Typeable {
-	public Type computeType(Environment env) throws TypeException;
+	public Type getType(Environment env) throws TypeException;
 }

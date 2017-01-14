@@ -4,7 +4,7 @@ import java.util.Stack;
 
 public class ASMBuilder {
 	
-	public static final String OP_S = "";
+	public static final String OP_S = "q";
 	
 	private static final String[] labels = new String[]{"blue", "red", "green",
 			"white", "black", "turtle", "clock", "fire", "water", "storm"};
@@ -61,7 +61,11 @@ public class ASMBuilder {
 	}
 	
 	public void jz(String label) {
-		txt.append("\tjz ").append(label).append('\n');
+		jflag(label, "z");
+	}
+	
+	public void jflag(String label, String flag) {
+		txt.append("\tj"+flag+" ").append(label).append('\n');
 	}
 	
 	public void main(String label) {
