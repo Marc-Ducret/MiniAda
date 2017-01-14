@@ -1,5 +1,6 @@
 package net.slimevoid.miniada.typing;
 
+import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValueAccess;
 
@@ -32,6 +33,6 @@ public class TypeAccess extends Type {
 
 	@Override
 	public int size() {
-		return 0x8;
+		return Compiler.WORD;
 	}
 }

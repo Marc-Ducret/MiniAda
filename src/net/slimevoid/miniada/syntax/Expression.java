@@ -97,10 +97,12 @@ public abstract class Expression extends SyntaxNode implements Typeable {
 	
 	public Type getType(Environment env) throws TypeException {
 		if(!computedType) type = computeType(env);
+		computedType = true;
 		return type;
 	}
 	
 	public Type getComputedType() {
+		assert(computedType);
 		return type;
 	}
 	

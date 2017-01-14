@@ -6,6 +6,7 @@ import java.util.List;
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Keyword;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
@@ -107,7 +108,7 @@ public class InstructionIf extends Instruction {
 	public void typeCheck(Environment env) throws TypeException {
 		for(Expression cond : conds) {
 			if(cond == null) break;
-			Type t = cond.computeType(env);
+			Type t = cond.getType(env);
 			if(!t.canBeCastedInto(TypePrimitive.BOOLEAN))
 				throw new TypeException(cond, 
 						"Expected type Boolean while expression has type "+t);
@@ -137,8 +138,27 @@ public class InstructionIf extends Instruction {
 	}
 
 	@Override
-	public void buildAsm(ASMBuilder build, Environment env) {
-		// TODO Auto-generated method stub
-		throw new RuntimeException("not impl");
+	public void buildAsm(ASMBuilder asm, Environment env) { //TODO more tests with multiple branches
+		String label = null;
+		String end = asm.newLabel();
+		Register r = asm.getTmpReg();
+		for(int i = 0; i < conds.length; i ++) {
+			Expression cond = conds[i];
+			InstructionBlock block = blocks[i];
+			if(cond != null) {
+				label = asm.newLabel();
+				cond.buildAsm(asm, env);
+				asm.pop(r);
+				asm.test(r, r);
+				asm.jz(label);
+			}
+			block.buildAsm(asm, env);
+			if(cond != null) {
+				asm.jmp(end);
+				asm.label(label);
+			}
+		}
+		asm.label(end);
+		asm.freeTempRegister(r);
 	}
 }

@@ -12,7 +12,7 @@ public class ASMVar extends ASMMem {
 		super(off, null);
 		this.anteriority = ant;
 	}
-
+	
 	public ASMVar(Identifier id, Environment env) {
 		this(env.getVarOffset(id), env.getVarAnteriority(id));
 	}

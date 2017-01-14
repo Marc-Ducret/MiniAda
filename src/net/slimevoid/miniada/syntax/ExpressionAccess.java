@@ -1,5 +1,6 @@
 package net.slimevoid.miniada.syntax;
 
+import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.execution.ASMConst;
@@ -75,26 +76,26 @@ public class ExpressionAccess extends Expression {
 				asm.pop(r);
 				int sF = this.getComputedType().size();
 				ASMMem from = new ASMMem(access.offset, r);
-				for(int i = 0; i < sF/8; i ++) {
+				for(int i = 0; i < sF/Compiler.WORD; i ++) {
 					asm.push(from);
-					from.offset(8);
+					from.offset(Compiler.WORD);
 				}
 				asm.freeTempRegister(r);
 			} else {
 				int sR = access.from.getComputedType().size();
 				int sF = this.getComputedType().size();
 				asm.add(new ASMConst(sR), Register.RSP);
-				ASMMem from = new ASMMem(access.offset+8, Register.RSP);
-				for(int i = 0; i < sF/8; i ++) {
+				ASMMem from = new ASMMem(access.offset+Compiler.WORD, Register.RSP);
+				for(int i = 0; i < sF/Compiler.WORD; i ++) {
 					asm.push(from);
 				}
 			}
 		} else {
 			assert(access.func == null);
 			ASMVar from = new ASMVar(access.id, env);
-			for(int i = 0; i < this.getComputedType().size()/8; i ++) {
+			for(int i = 0; i < this.getComputedType().size()/Compiler.WORD; i ++) {
 				asm.push(from);
-				from.offset(8);
+				from.offset(Compiler.WORD);
 			}
 		}
 	}

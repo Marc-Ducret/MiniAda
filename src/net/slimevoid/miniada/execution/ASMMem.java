@@ -14,7 +14,7 @@ public class ASMMem implements ASMOperand {
 
 	@Override
 	public void appendToBuilder(StringBuilder buff) {
-		buff.append(-offset).append("(%").append(ref.name().toLowerCase()).append(')');
+		buff.append(-offset).append("(%").append(ref.name().toLowerCase().replace('e',  'r')).append(')');
 	}
 
 	@Override

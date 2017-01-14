@@ -31,11 +31,13 @@ import net.slimevoid.miniada.typing.TypePrimitive;
 
 public class Compiler {
 	
-	public final static int PASS_LEX = 0x0,
+	public static final int PASS_LEX = 0x0,
 							PASS_STX = 0x1,
 							PASS_TYP = 0x2,
 							PASS_ASM = 0x3,
 							PASS_EXE = 0x4;
+	
+	public static final int WORD = 0x08;
 	
 	public static void main(String[] args) {
 		try {

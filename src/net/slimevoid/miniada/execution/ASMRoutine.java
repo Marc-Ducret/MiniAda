@@ -3,7 +3,7 @@ package net.slimevoid.miniada.execution;
 /**
  * Execution scheme:
  * parameters: stack
- * return value in %rbx
+ * return value on stack
  * computations with %r(8-15) and stack
  */
 public interface ASMRoutine {

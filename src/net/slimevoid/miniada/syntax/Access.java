@@ -96,11 +96,17 @@ public class Access extends SyntaxNode implements Typeable {
 		assert(alterable);
 		if(from != null) {
 			if(from.getComputedType().isAccess()) {
-				Register r = asm.getTmpReg();
+				assert(false);
+				Register r = asm.getTmpReg(); //TODO fix register leak
 				from.buildAsm(asm, env);
 				asm.pop(r);
 				return new ASMMem(offset, r);
 			}
+			assert(from instanceof ExpressionAccess);
+			Access a = ((ExpressionAccess) from).access;
+			ASMMem mem = a.getAsmOperand(asm, env);
+			mem.offset(offset);
+			return mem;
 		}
 		assert(func == null); //TODO deal with funcs
 		return new ASMVar(id, env);

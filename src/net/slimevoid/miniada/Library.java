@@ -30,7 +30,7 @@ public class Library {
 			@Override
 			public void buildASM(ASMBuilder asm) {
 				asm.label(getLabel(asm));
-				asm.mov(new ASMVar(-8, 0), Register.RSI);
+				asm.mov(new ASMVar(-Compiler.WORD, 0), Register.RSI);
 				ASMData msg = asm.registerString("%c");
 				asm.mov(msg, Register.RDI);
 				asm.mov(new ASMConst(0), Register.RAX);
@@ -75,8 +75,8 @@ public class Library {
 			public void buildASM(ASMBuilder asm) {
 				asm.label(getLabel(asm));
 				Register r = asm.getTmpReg();
-				asm.mov(new ASMVar(-8, 0), r);
-				asm.mov(r, new ASMMem(-16, Register.RBP));
+				asm.mov(new ASMVar(-Compiler.WORD, 0), r);
+				asm.mov(r, new ASMMem(-2*Compiler.WORD, Register.RBP));
 				asm.freeTempRegister(r);
 				asm.ret();
 			}

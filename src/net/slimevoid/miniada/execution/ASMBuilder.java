@@ -4,6 +4,8 @@ import java.util.Stack;
 
 public class ASMBuilder {
 	
+	public static final String OP_S = "";
+	
 	private static final String[] labels = new String[]{"blue", "red", "green",
 			"white", "black", "turtle", "clock", "fire", "water", "storm"};
 	
@@ -69,7 +71,7 @@ public class ASMBuilder {
 	public void binaryInstr(String name, ASMOperand from, ASMOperand to) {
 		from.pre(this);
 		to.pre(this);
-		txt.append('\t').append(name).append(' ');
+		txt.append('\t').append(name).append(OP_S).append(' ');
 		from.appendToBuilder(txt);
 		txt.append(", ");
 		to.appendToBuilder(txt);
@@ -80,10 +82,15 @@ public class ASMBuilder {
 	
 	public void unaryInstr(String name, ASMOperand op) {
 		op.pre(this);
-		txt.append('\t').append(name).append(' ');
+		txt.append('\t').append(name).append(OP_S).append(' ');
 		op.appendToBuilder(txt);
 		txt.append('\n');
 		op.post(this);
+	}
+	
+	public void set(String flag, Register r) {
+		txt.append('\t').append("set").append(flag).append(" %").append(r.name().toLowerCase()).append('b');
+		txt.append('\n');
 	}
 	
 	private void arglessInstr(String name) {
@@ -106,6 +113,10 @@ public class ASMBuilder {
 		binaryInstr("test", from, to);
 	}
 	
+	public void cmp(ASMOperand opA, ASMOperand opB) {
+		binaryInstr("cmp", opA, opB);
+	}
+	
 	public void push(ASMOperand op) {
 		unaryInstr("push", op);
 	}
@@ -114,12 +125,19 @@ public class ASMBuilder {
 		unaryInstr("pop", op);
 	}
 	
+	public void not(ASMOperand op) {
+		unaryInstr("noq", op);
+	}
+	
+	public void neg(ASMOperand op) {
+		unaryInstr("neg", op);
+	}
+	
 	public void ret() {
 		arglessInstr("ret");
 	}
 	
 	public void comment(String line) {
-		//TODO no debug mode
 		if(!line.contains("\n")) txt.append("\t# ").append(line).append('\n');
 	}
 	

@@ -117,7 +117,10 @@ public abstract class Instruction extends SyntaxNode {
 
 		@Override
 		public void buildAsm(ASMBuilder asm, Environment env) {
-			for(Instruction instr : instrs) instr.buildAsm(asm, env);
+			for(Instruction instr : instrs) {
+				asm.comment(instr.toString());
+				instr.buildAsm(asm, env);
+			}
 		}
 	}
 }

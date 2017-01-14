@@ -94,7 +94,7 @@ public class DeclarationProcedure extends Declaration implements ASMRoutine {
 		}
 		this.pars = pars.toArray(new Par[pars.size()]);
 		env.registerProcedure(this);
-		localEnv.offset(16);
+		localEnv.offset(Compiler.WORD*2);
 		for(Declaration decl : decls) decl.typeDeclaration(localEnv);
 		if(decls.length > 0) localEnv.checkDefinitions(decls[decls.length-1]);
 		instrs.typeCheck(localEnv);
@@ -112,9 +112,9 @@ public class DeclarationProcedure extends Declaration implements ASMRoutine {
 	@Override
 	public void buildASM(ASMBuilder asm) {
 		asm.label(getLabel(asm));
-		asm.sub(new ASMConst(localEnv.getOffset()-16), Register.RSP); //TODO check
+		asm.sub(new ASMConst(localEnv.getOffset()-Compiler.WORD*2), Register.RSP);
 		instrs.buildAsm(asm, localEnv);
-		asm.add(new ASMConst(localEnv.getOffset()-16), Register.RSP); //TODO check
+		asm.add(new ASMConst(localEnv.getOffset()-Compiler.WORD*2), Register.RSP);
 		asm.ret();
 	}
 	

@@ -75,8 +75,8 @@ public class InstructionWhile extends Instruction {
 
 	@Override
 	public void buildAsm(ASMBuilder asm, Environment env) {
-		String end = asm.newLabel();
 		String start = asm.newLabel();
+		String end = asm.newLabel();
 		asm.label(start);
 		cond.buildAsm(asm, env);
 		Register r = asm.getTmpReg();

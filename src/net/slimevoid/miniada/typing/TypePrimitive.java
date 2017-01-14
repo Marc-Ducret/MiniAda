@@ -8,6 +8,7 @@ import java.util.Map;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValueAccess;
 import net.slimevoid.miniada.interpert.ValuePrimitive;
+import net.slimevoid.miniada.Compiler;
 
 public abstract class TypePrimitive extends Type {
 	
@@ -21,7 +22,7 @@ public abstract class TypePrimitive extends Type {
 
 		@Override
 		public int size() {
-			return 0x8;
+			return Compiler.WORD;
 		}
 	},
 									  BOOLEAN = new TypePrimitive("Boolean"){
@@ -31,7 +32,7 @@ public abstract class TypePrimitive extends Type {
 
 		@Override
 		public int size() {
-			return 0x8;
+			return Compiler.WORD;
 		}
 	},
 									CHARACTER = new TypePrimitive("Character") {
@@ -41,7 +42,7 @@ public abstract class TypePrimitive extends Type {
 
 		@Override
 		public int size() {
-			return 0x8;
+			return Compiler.WORD;
 		}
 	};
 	
@@ -61,7 +62,7 @@ public abstract class TypePrimitive extends Type {
 
 		@Override
 		public int size() {
-			return 0x8;
+			return Compiler.WORD;
 		};
 	};
 	

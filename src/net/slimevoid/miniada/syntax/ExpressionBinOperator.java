@@ -1,7 +1,10 @@
 package net.slimevoid.miniada.syntax;
 
+import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMConst;
+import net.slimevoid.miniada.execution.ASMMem;
 import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.syntax.Operator.OperatorType;
@@ -100,7 +103,29 @@ public class ExpressionBinOperator extends Expression {
 		} else {
 			eR.buildAsm(asm, env);
 			if(op.type == OperatorType.EQ || op.type == OperatorType.NEQ) {
-				throw new RuntimeException("not impl"); //TODO impl 
+				boolean eq = op.type == OperatorType.EQ;
+				Register rA = asm.getTmpReg();
+				Register rB = asm.getTmpReg();
+				Register res = asm.getTmpReg();
+				asm.mov(new ASMConst(eq ? 1 : 0), res);
+				int size = eL.getComputedType().size();
+				ASMMem memA = new ASMMem(0, Register.RSP);
+				ASMMem memB = new ASMMem(-size, Register.RSP);
+				for(int i = 0; i < size/Compiler.WORD; i++) {
+					asm.mov(memA, rA);
+					asm.mov(memB, rB);
+					asm.cmp(rA, rB);
+					asm.mov(new ASMConst(0), rA);
+					asm.set(eq ? "e" : "ne", rA);
+					asm.binaryInstr(eq ? "and" : "or", rA, res);
+					memA.offset(-Compiler.WORD);
+					memB.offset(-Compiler.WORD);
+				}
+				asm.add(new ASMConst(size*2), Register.RSP);
+				asm.push(res);
+				asm.freeTempRegister(rA);
+				asm.freeTempRegister(rB);
+				asm.freeTempRegister(res);
 			} else if(op.type == OperatorType.DIVIDE){
 				throw new RuntimeException("not impl");//TODO impl 
 			} else {
@@ -108,14 +133,14 @@ public class ExpressionBinOperator extends Expression {
 				switch(op.type) {
 				case AND: 		instr = "and"; 	break;
 				case OR:		instr = "or"; 	break;
-				case GE:		instr = "?"; 	break;//TODO ??
-				case GT:		instr = "?"; 	break;
-				case LE:		instr = "?"; 	break;
-				case LT:		instr = "?"; 	break;
+				case GE:		instr = "cmp";	break;
+				case GT:		instr = "cmp";	break;
+				case LE:		instr = "cmp";	break;
+				case LT:		instr = "cmp";	break;
 				case MINUS:		instr = "sub"; 	break;
 				case PLUS:		instr = "add"; 	break;
-				case REM:		instr = "or"; 	break;
-				case TIMES:		instr = "imul"; 	break;
+				case REM:		instr = "?"; 	break;
+				case TIMES:		instr = "imul";	break;
 				default:
 					break;
 				}
@@ -124,6 +149,18 @@ public class ExpressionBinOperator extends Expression {
 				asm.pop(rR);
 				asm.pop(rL);
 				asm.binaryInstr(instr, rR, rL);
+				String flag;
+				switch(op.type) {
+				case GE:		flag = "ge";	break;
+				case GT:		flag = "g" ;	break;
+				case LE:		flag = "le";	break;
+				case LT:		flag = "l" ;	break;
+				default: 		flag = null; 	break;
+				}
+				if(flag != null) {
+					asm.mov(new ASMConst(0), rL);
+					asm.set(flag, rL);
+				}
 				asm.push(rL);
 				asm.freeTempRegister(rL);
 				asm.freeTempRegister(rR);

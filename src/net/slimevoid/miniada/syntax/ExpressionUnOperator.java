@@ -2,6 +2,7 @@ package net.slimevoid.miniada.syntax;
 
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.typing.Environment;
 import net.slimevoid.miniada.typing.Type;
@@ -55,7 +56,18 @@ public class ExpressionUnOperator extends Expression {
 
 	@Override
 	public void buildAsm(ASMBuilder asm, Environment env) {
-		//TODO impl
-		throw new RuntimeException("not impl");	
+		Register r = asm.getTmpReg();
+		e.buildAsm(asm, env);
+		asm.pop(r);
+		switch(op.type) {
+		case MINUS:
+			asm.neg(r);
+		case NOT:
+			asm.test(r, r);
+			asm.set("z", r);
+		default: break;
+		}
+		asm.push(r);
+		asm.freeTempRegister(r);
 	}
 }

@@ -37,7 +37,7 @@ public class LinuxExecuter extends Executer {
 					+" -o "+temp.getName()+"/"+exe.getName());
 			if(gcc.waitFor() != 0)
 				throw new ExecutionException("GCC failed");
-			Process p = Runtime.getRuntime().exec("./"+exe.getName());
+			Process p = Runtime.getRuntime().exec("./"+temp.getName()+"/"+exe.getName());
 			BufferedReader r = new BufferedReader(
 					new InputStreamReader(p.getInputStream()));
 			String ln;
