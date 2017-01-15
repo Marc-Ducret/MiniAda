@@ -73,19 +73,28 @@ En dehors de ça, il n'y a rien de très spécifique à ce typeur.
 
 Sources : package execution, fonctions buildAsm
 
-La partie "Executer" peuit être ignorée, elle permet seulement d'effectuer des tests
+La partie "Executer" peut être ignorée, elle permet seulement d'effectuer des tests
 d'execution sur un serveur situé sous Linux depuis Windows où je n'ai pas réussi à
 compiler le code assembleur tel que l'on l'écrit.
 L'écriture à proprement parler de l'assembleur est gérée par ASMBuilder (similaire au
 module OCaml fourni).
 
-Détaillons maintenant quelques points de détail qui ont posé problème.
+Détaillons maintenant quelques points de détail.
+
+ * Expressions
+Lors du calcul d'une expression, tout résultat intermédiaire est stocké sur la pile.
+
+ * Registres temporaires
+Certaines actions nécessitent parfois des registres. Ceux-ci sont alloués avec
+getTmpReg(), ce qui permet de faire abstraction, lors du développement, des registres
+déjà utilisés ou non. Cependant le procédé de compilation assure qu'il n'est pas possible
+d'allouer une quantité arbitraire de ces registres.
 
  * Appels de fonction
 Le déroulement d'un appel est classique si ce n'est l'ajout dans chaque frame d'un 
-frameID unique pour chaque fonction déclarée. Celui-ci m'est nécéssaire pour chercher
-une variable qui est locale est une fonction ancètre. En effet, on ne sais pas à
-quelle profondeure on se trouve par rapport à elle dans la pile d'appel. Il suffit alors
+frameID unique pour chaque fonction déclarée. Celui-ci m'est nécessaire pour chercher
+une variable qui est locale est une fonction ancêtre. En effet, on ne sait pas à
+quelle profondeur on se trouve par rapport à elle dans la pile d'appel. Il suffit alors
 de trouver la frame la plus profonde avec le bon frameID.
 
  * Passage in-out
@@ -93,7 +102,7 @@ Il a été choisi pour ce mode de passage de fonctionner comme spécifier par AD
 erreur de ma part) c'est-à-dire de passer les paramètres par valeur puis, une fois
 l'appel terminé, de recopier les valeurs éventuellement altérées.
 
- * Eniters 32 bits sur une machine 64 bits
+ * Entiers 32 bits sur une machine 64 bits
 Ma première idée était de n'utiliser que des instructions sur 32 bits (addl, %eax, pushl...)
 cependant, je n'ai pas réussi à compiler les pushl et les popl. Ainsi, l'efficacité hors
 de préoccupation, j'ai ajouté des instructions movslq %eax, %rax après chaque opération
@@ -102,5 +111,23 @@ arithmétique. Cette solution est particulièrement déplaisante...
  * Allocation
 Tous les variables sont allouées sur la pile. Les records alloués par un "new" le sont
 sur le tas, sans préoccupation de libération de cette mémoire.
+
+{ Remarques }
+
+Certaines structures du code sont peu agréables en conséquence des aspects peu naturels d'ADA.
+Par exemple la distinction entre Fonction et Procédure entraîne la duplication de certains
+segments de code.
+
+En lançant les tests avec le script fourni, le compilateur semble très lent. En réalité,
+c'est surtout le coup fixe de l'initialisation de la JVM qui se fait sentir. En effet,
+j'ai effectué mes tests directement dans le compilateur (runTests) et ceux-ci, comme
+le programme n'est lancé qu'une fois, sont bien plus rapides (spécifiquement sur l'aspect
+syntaxe et typage).
+
+Certains relativement rares fragments de code sont probablement obsolètes. Je m'en excuse,
+il faudrait procéder à un nettoyage mais l'échéance approche.
+
+Ce projet réalisé m'a apporté une compréhension bien plus profonde de l'enjeu de la compilation
+et des outils dont dispose un compilateur.
 
 ### Marc Ducret - 2016/2017 ###

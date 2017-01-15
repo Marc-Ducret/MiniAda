@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.nio.file.Files;
-import java.util.Random;
 
 public class LinuxExecuter extends Executer {
 	
@@ -20,8 +19,6 @@ public class LinuxExecuter extends Executer {
 
 	@Override
 	public String execute(String asm) throws ExecutionException {
-//		Random rand = new Random();
-//		File temp = new File(this.temp.getParent(), ".tmp_"+rand.nextInt(0xFFFFFF));
 		temp.mkdir();
 		File s = new File(temp, "asm.s");
 		File o = new File(temp, "asm.o");
