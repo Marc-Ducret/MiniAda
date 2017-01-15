@@ -92,10 +92,10 @@ public class InstructionAssign extends Instruction {
 		expr.buildAsm(asm, env);
 		ASMMem mem = access.getAsmOperand(asm, env);
 		int size = expr.getComputedType().size();
-		mem.offset(size-Compiler.WORD);
+		mem.offset(size);
 		for(int i = 0; i < size/Compiler.WORD; i++) {
-			asm.pop(mem);
 			mem.offset(-Compiler.WORD);
+			asm.pop(mem);
 		}
 		mem.freeRegister(asm);
 	}

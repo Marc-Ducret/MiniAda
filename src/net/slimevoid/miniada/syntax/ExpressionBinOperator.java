@@ -99,7 +99,25 @@ public class ExpressionBinOperator extends Expression {
 	public void buildAsm(ASMBuilder asm, Environment env) {
 		eL.buildAsm(asm, env);
 		if(op.type == OperatorType.AND_THEN || op.type == OperatorType.OR_ELSE) {
-			throw new RuntimeException("not impl"); //TODO impl 
+			boolean and = op.type == OperatorType.AND_THEN;
+			String lshort = asm.newLabel();
+			String llong  = asm.newLabel();
+			Register r = asm.getTmpReg();
+			asm.pop(r);
+			asm.test(r, r);
+			asm.jflag(lshort, and ? "z" : "nz");
+			asm.freeTempRegister(r);
+			eR.buildAsm(asm, env);
+			r = asm.getTmpReg();
+			asm.pop(r);
+			asm.test(r, r);
+			asm.jflag(lshort, and ? "z" : "nz");
+			asm.freeTempRegister(r);
+			asm.push(new ASMConst(and ? 1 : 0));
+			asm.jmp(llong);
+			asm.label(lshort);
+			asm.push(new ASMConst(and ? 0 : 1));
+			asm.label(llong);
 		} else {
 			eR.buildAsm(asm, env);
 			if(op.type == OperatorType.EQ || op.type == OperatorType.NEQ) {
@@ -131,7 +149,9 @@ public class ExpressionBinOperator extends Expression {
 				asm.pop(r);
 				asm.pop(Register.RAX);
 				asm.mov(new ASMConst(0), Register.RDX);
-				asm.unaryInstr("div", r);
+				asm.arglessInstr("cqo");
+				asm.unaryInstr("idiv", r);
+				asm.arglessInstr("movslq %eax, %rax"); //TODO rm ?
 				asm.push(op.type == OperatorType.REM ? Register.RDX : Register.RAX);
 				asm.freeTempRegister(r);
 			} else {
@@ -154,6 +174,14 @@ public class ExpressionBinOperator extends Expression {
 				asm.pop(rR);
 				asm.pop(rL);
 				asm.binaryInstr(instr, rR, rL);
+				switch(op.type) {
+				case MINUS:
+				case PLUS:
+				case TIMES:
+					asm.arglessInstr("movslq %"+rL.regName("l")+", %"+rL.regName("")); //TODO rm ?
+				default:
+					break;
+				}
 				String flag;
 				switch(op.type) {
 				case GE:		flag = "ge";	break;

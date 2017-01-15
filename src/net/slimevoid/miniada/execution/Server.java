@@ -13,6 +13,7 @@ public class Server {
 	
 	private ServerSocket serv;
 	private final Executer exec;
+	private boolean token = true;;
 	
 	public Server(Executer exec, int port) throws IOException {
 		serv = new ServerSocket(port);
@@ -26,23 +27,37 @@ public class Server {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					System.out.println("Connection established");
+					System.out.print("Connection established...");
+					while(!token)
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e2) {}
+					token = false;
+					System.out.println("OK-go");
 					try {
 						DataOutputStream out = new DataOutputStream(
 							new BufferedOutputStream(sok.getOutputStream()));
 						DataInputStream in = new DataInputStream(
 							new BufferedInputStream(sok.getInputStream()));
 						try {
-							String asm = in.readUTF();
+							int asmSize = in.readInt();
+							byte[] b = new byte[asmSize];
+							int read = 0;
+							while(read < asmSize) {
+								read += in.read(b, read, asmSize-read);
+							}
+							String asm = new String(b);
 							System.out.println("Executing");
-							System.out.println(asm);
 							String res = exec.execute(asm);
+							System.out.println("Execution complete");
 							out.writeBoolean(true);
-							out.writeUTF(res);
+							out.writeInt(res.length());
+							out.writeBytes(res);
 						} catch (ExecutionException e) {
 							out.writeBoolean(false);
-							out.writeUTF(e.message);
-							System.out.println("Execution failed");
+							out.writeInt(e.message.length());
+							out.writeBytes(e.message);
+							System.out.println("Execution failed : "+e.message);
 						}
 						out.flush();
 					} catch (IOException e) {
@@ -50,6 +65,7 @@ public class Server {
 							sok.close();
 						} catch (IOException e1) {}
 					}
+					token = true;
 				}
 			}).start();
 		}

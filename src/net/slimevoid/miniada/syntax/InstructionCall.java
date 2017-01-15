@@ -4,11 +4,13 @@ import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
 import net.slimevoid.miniada.execution.ASMConst;
+import net.slimevoid.miniada.execution.ASMMem;
 import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.token.Symbol.SymbolType;
 import net.slimevoid.miniada.typing.Environment;
+import net.slimevoid.miniada.typing.Par;
 import net.slimevoid.miniada.typing.Type;
 import net.slimevoid.miniada.typing.TypeException;
 
@@ -87,5 +89,25 @@ public class InstructionCall extends Instruction {
 		asm.pop(Register.RBP);
 		asm.planBuild(proc);
 		if(size > 0) asm.add(new ASMConst(size), Register.RSP);
+		int off = 0;
+		for(int i = 0; i < proc.pars.length; i ++) {
+			Par p = proc.pars[i];
+			if(p.out) {
+				Access a = ((ExpressionAccess)call.exprs[i]).access;
+				ASMMem stack = new ASMMem(off, Register.RSP);
+				stack.offset(Compiler.WORD);
+				ASMMem mem = a.getAsmOperand(asm, env);
+				Register r = asm.getTmpReg();
+				for(int j = 0; j < p.type.size() / Compiler.WORD; j ++) {
+					asm.mov(stack, r);
+					asm.mov(r, mem);
+					mem.offset(Compiler.WORD);
+					stack.offset(Compiler.WORD);
+				}
+				asm.freeTempRegister(r);
+				mem.freeRegister(asm);
+			}
+			off += p.type.size();
+		}
 	}
 }

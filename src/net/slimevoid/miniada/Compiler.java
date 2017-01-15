@@ -1,6 +1,8 @@
 package net.slimevoid.miniada;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -10,6 +12,7 @@ import java.util.List;
 
 import net.slimevoid.miniada.TokenList.OutOfBoundsException;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMConst;
 import net.slimevoid.miniada.execution.ExecutionException;
 import net.slimevoid.miniada.execution.RemoteExecuter;
 import net.slimevoid.miniada.execution.ASMBuilder.Register;
@@ -66,8 +69,19 @@ public class Compiler {
 				System.err.println("No source file specified");
 				System.exit(-1);
 			}
-			if(comp.compile(new File(source), pass, 1)) System.exit(0);
-			else System.exit(1);
+			PrintStream out = null;
+			if(pass >= PASS_ASM) {
+				out = new PrintStream(new BufferedOutputStream(
+						new FileOutputStream(source.substring(0, source.length()-3)+'s')));
+			}
+			if(comp.compile(new File(source), pass, 0, out)) {
+				if(out != null) out.close();
+				System.exit(0);
+			} else {
+				if(out != null) out.close();
+				comp.compile(new File(source), pass, 1);
+				System.exit(1);
+			}
 		} catch(Exception e) {
 			System.err.println("Unhandeled exception:");
 			e.printStackTrace();
@@ -77,10 +91,10 @@ public class Compiler {
 	
 	public void test(String tests) throws IOException {
 		long startTime = System.nanoTime();
-		runTests(new File(tests+"syntax/"), 1);
-		runTests(new File(tests+"typing/"), 2);
-		runTests(new File(tests+"exec/"), 3);
-		runTests(new File(tests+"exec-fail/"), 2);
+		runTests(new File(tests+"syntax/"), PASS_STX);
+		runTests(new File(tests+"typing/"), PASS_TYP);
+		runTests(new File(tests+"exec/"), PASS_EXE);
+		runTests(new File(tests+"exec-fail/"), PASS_ASM);
 		long elapsed = (System.nanoTime() - startTime)/1000000;
 		System.out.println("Testing ended in "+elapsed+" ms");
 	}
@@ -105,6 +119,7 @@ public class Compiler {
 						typeAnalysis(src, debug);
 						if(maxPass >= PASS_ASM) {
 							asm = buildAsm(src, debug);
+							if(maxPass < PASS_EXE) out.print(asm);
 						}
 					}
 				}
@@ -125,6 +140,14 @@ public class Compiler {
 				if(debug) e.printStackTrace();
 			}
 			return false;
+		} catch (Exception e) {
+			if(!silent) System.err.println("Fatal error: "+e+" : "+e.getMessage());
+			if(debug) e.printStackTrace();
+			return false;
+		} catch (Error e) {
+			if(!silent) System.err.println("Fatal error: "+e+" : "+e.getMessage());
+			if(debug) e.printStackTrace();
+			return false;
 		}
 		long elapsed = (System.nanoTime() - startTime)/1000000;
 		if(!silent)
@@ -137,8 +160,8 @@ public class Compiler {
 					String res = new RemoteExecuter("89.156.241.115", 1337)
 							.execute(asm);
 					elapsed = (System.nanoTime() - startTime)/1000000;
-					if(debug) 
-						System.out.println(res);
+					out.print(res); //if not debug?
+					out.flush();
 					if(!silent)
 						System.out.println("Execution successful in "
 															+elapsed+"ms");
@@ -148,7 +171,7 @@ public class Compiler {
 						System.err.println("Rune time error:");
 						System.err.println(e.getMessage());
 					}
-					if(debug) e.printStackTrace();
+					return false;
 				}
 			}
 		}
@@ -168,41 +191,45 @@ public class Compiler {
 			ct ++;
 			ByteArrayOutputStream buff = new ByteArrayOutputStream();
 			PrintStream out = new PrintStream(buff);
-			if(compile(f, pass, 0, out)) {
-				boolean success = true;
-				String res = new String(buff.toByteArray(), 
-						StandardCharsets.UTF_8);
-				res = res.replaceAll("\r\n", "\n");
-				String expected = "";
-				if(pass >= PASS_EXE) {
-					String n = f.getName();
-					FileReader read = new FileReader(
-							new File(testFolder, 
-									n.substring(0, n.length()-3)+"out"));
-					int r;
-					int i = 0;
-					while((r = read.read()) >= 0) {
-						if((char) r == '\r') continue;
-						expected += (char) r;
-						if(i >= res.length())
-							success = false;
-						else if(res.charAt(i) != (char)r)
-							success = false;
-						i++;
+			try {
+				if(compile(f, pass, 0, out)) {
+					boolean success = true;
+					String res = new String(buff.toByteArray(), 
+							StandardCharsets.UTF_8);
+					res = res.replaceAll("\r\n", "\n");
+					String expected = "";
+					if(pass >= PASS_EXE) {
+						String n = f.getName();
+						FileReader read = new FileReader(
+								new File(testFolder, 
+										n.substring(0, n.length()-3)+"out"));
+						int r;
+						int i = 0;
+						while((r = read.read()) >= 0) {
+							if((char) r == '\r') continue;
+							expected += (char) r;
+							if(i >= res.length())
+								success = false;
+							else if(res.charAt(i) != (char)r)
+								success = false;
+							i++;
+						}
+						read.close();
 					}
-					read.close();
+					if(success) ok++;
+					else {
+						System.out.println("Failed execution "+f.getName());
+						System.out.println("Print:");
+						System.out.println(res);
+						System.out.println("Expected:");
+						System.out.println(expected);
+					}
+				} else {
+					System.out.println("Failed compilation "+f.getName());
+					compile(f, pass, 1, out);
 				}
-				if(success) ok++;
-				else {
-					System.out.println("Failed execution "+f.getName());
-					System.out.println("Print:");
-					System.out.println(res);
-					System.out.println("Expected:");
-					System.out.println(expected);
-				}
-			} else {
-				System.out.println("Failed compilation "+f.getName());
-				compile(f, pass, 1, out);
+			} catch (Exception e) {
+				System.out.println("Compilation encountered a fatal error: "+e+" : "+e.getMessage());
 			}
 			buff.close();
 		}
@@ -262,6 +289,7 @@ public class Compiler {
 	private void typeAnalysis(SourceFile src, boolean debug)
 			throws TypeException {
 		if(debug) System.out.println("== TYPE ==");
+		Library.initNatives();
 		Environment env = new Environment(null) {
 			@Override
 			public Type getType(Identifier id) throws TypeException {
@@ -289,6 +317,7 @@ public class Compiler {
 		asm.label("main");
 		asm.mov(Register.RSP, Register.RBP);
 		asm.call(src.dproc.getLabel(asm));
+		asm.mov(new ASMConst(0), Register.RAX);
 		asm.ret();
 		asm.planBuild(src.dproc);
 		asm.build();

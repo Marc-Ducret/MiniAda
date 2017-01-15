@@ -101,7 +101,7 @@ public abstract class Instruction extends SyntaxNode {
 		public boolean willReturn() throws TypeException {
 			boolean wret = false;
 			for(Instruction instr : instrs) {
-				if(wret) throw new TypeException(instr, "Dead code");
+//				if(wret) throw new TypeException(instr, "Dead code");
 				if(instr.willReturn()) wret = true;
 			}
 			return wret;

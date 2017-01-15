@@ -88,7 +88,9 @@ public class DeclarationFunction extends Declaration implements ASMRoutine {
 				Type t = p.type.getType(localEnv);
 				localEnv.offset(-t.size()*p.ids.size());
 			}
-			localEnv.returnLoc = new ASMMem(localEnv.getOffset()-retType.size(), Register.RBP);
+		}
+		localEnv.returnLoc = new ASMMem(localEnv.getOffset()-retType.size(), Register.RBP);
+		if(params != null) {
 			for(Param p : params.ps) {
 				for(Identifier id : p.ids)
 					localEnv.registerVar(id);
@@ -102,7 +104,7 @@ public class DeclarationFunction extends Declaration implements ASMRoutine {
 		}
 		this.pars = pars.toArray(new Par[pars.size()]);
 		env.registerFunction(this);
-		localEnv.offset(Compiler.WORD*2);
+		localEnv.offset(Compiler.WORD*3);
 		for(Declaration decl : decls) decl.typeDeclaration(localEnv);
 		if(decls.length > 0) localEnv.checkDefinitions(decls[decls.length-1]);
 		instrs.typeCheck(localEnv);
@@ -124,7 +126,8 @@ public class DeclarationFunction extends Declaration implements ASMRoutine {
 	public void buildASM(ASMBuilder asm) {
 		asm.label(getLabel(asm));
 		asm.comment("func "+name);
-		asm.sub(new ASMConst(localEnv.getOffset()-Compiler.WORD*2), Register.RSP);
+		asm.push(new ASMConst(localEnv.frameID));
+		asm.sub(new ASMConst(localEnv.getOffset()-Compiler.WORD*3), Register.RSP);
 		for(Declaration decl : decls) {
 			if(decl instanceof DeclarationVariable) {
 				DeclarationVariable dv = (DeclarationVariable)decl;

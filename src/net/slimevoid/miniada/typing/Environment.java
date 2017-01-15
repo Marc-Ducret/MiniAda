@@ -26,10 +26,12 @@ public class Environment {
 	private Map<String, NameSpace> nameSpaces = new HashMap<>();
 	
 	public final Type expectedReturn;
+	public final int frameID;
 	public ASMMem returnLoc;
 	
 	public Environment(Type expectedReturn) {
 		this.expectedReturn = expectedReturn;
+		this.frameID = this.hashCode() % (1 << 31);
 	}
 	
 	public Type getVarType(Identifier id) throws TypeException {
@@ -49,8 +51,8 @@ public class Environment {
 		return varOffsets.get(id.name.toLowerCase());
 	}
 	
-	public int getVarAnteriority(Identifier id) {
-		return 0;
+	public int getVarFrameID(Identifier id) {
+		return frameID;
 	}
 	
 	public Type getType(Identifier id) throws TypeException {
@@ -180,5 +182,9 @@ public class Environment {
 
 	public int getOffset() {
 		return curOffset;
+	}
+
+	public boolean isVarLocal(Identifier id) {
+		return varOffsets.containsKey(id.toString().toLowerCase());
 	}
 }

@@ -92,7 +92,7 @@ public abstract class Expression extends SyntaxNode implements Typeable {
 	}
 	
 	public boolean isAlterable() {
-		return type.isAccess();
+		return false;
 	}
 	
 	@Override

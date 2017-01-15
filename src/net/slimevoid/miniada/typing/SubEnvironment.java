@@ -34,10 +34,10 @@ public class SubEnvironment extends Environment {
 	}
 	
 	@Override
-	public int getVarAnteriority(Identifier id) {
+	public int getVarFrameID(Identifier id) {
 		Integer off = super.getVarOffset(id);
-		if(off != null) return 0;
-		return parent.getVarAnteriority(id) + 1;
+		if(off != null) return frameID;
+		return parent.getVarFrameID(id);
 	}
 	
 	@Override

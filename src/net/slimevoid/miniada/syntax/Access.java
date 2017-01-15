@@ -104,10 +104,10 @@ public class Access extends SyntaxNode implements Typeable {
 			assert(from instanceof ExpressionAccess);
 			Access a = ((ExpressionAccess) from).access;
 			ASMMem mem = a.getAsmOperand(asm, env);
-			mem.offset(-offset);
+			mem.offset(offset);
 			return mem;
 		}
-		assert(func == null); //TODO deal with funcs
+		assert(func == null);
 		return new ASMVar(id, env);
 	}
 }

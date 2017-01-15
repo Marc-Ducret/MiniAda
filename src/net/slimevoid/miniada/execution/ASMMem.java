@@ -11,10 +11,14 @@ public class ASMMem implements ASMOperand {
 		this.offset = off;
 		this.ref = ref;
 	}
+	
+	public ASMMem(ASMMem copy) {
+		this(copy.offset, copy.ref);
+	}
 
-	@Override
+ 	@Override
 	public void appendToBuilder(StringBuilder buff) {
-		buff.append(-offset).append("(%").append(ref.name().toLowerCase().replace('e',  'r')).append(')');
+		buff.append(-offset).append("(%").append(ref.regName(ASMBuilder.OP_S)).append(')');
 	}
 
 	@Override

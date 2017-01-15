@@ -15,10 +15,27 @@ public class ASMBuilder {
 	public static enum Register implements ASMOperand {
 		RAX, RBX, RCX, RDX, RBP, RSP, RSI, RDI,
 		R8, R9, R10, R11, R12, R13, R14, R15;
-
+		
+		public String regName(String size) {
+			switch(size) {
+			case "q":
+			case "":
+				return name().toLowerCase();
+				
+			case "l":
+				if(ordinal() < 8) return name().toLowerCase().replace('r', 'e');
+				return name().toLowerCase() + "d";
+				
+			case "b":
+				if(ordinal() >= 8) return name().toLowerCase() + "b";
+			default:
+				throw new RuntimeException("Unknown register size "+size);
+			}
+		}
+		
 		@Override
 		public void appendToBuilder(StringBuilder buff) {
-			buff.append('%').append(this.name().toLowerCase());
+			buff.append('%').append(this.regName(OP_S));
 		}
 
 		@Override
@@ -93,11 +110,11 @@ public class ASMBuilder {
 	}
 	
 	public void set(String flag, Register r) {
-		txt.append('\t').append("set").append(flag).append(" %").append(r.name().toLowerCase()).append('b');
+		txt.append('\t').append("set").append(flag).append(" %").append(r.regName("b"));
 		txt.append('\n');
 	}
 	
-	private void arglessInstr(String name) {
+	public void arglessInstr(String name) {
 		txt.append('\t').append(name).append('\n');
 	}
 	
@@ -137,12 +154,16 @@ public class ASMBuilder {
 		unaryInstr("neg", op);
 	}
 	
+	public void syscall() {
+		txt.append("\tint $0x80\n");
+	}
+	
 	public void ret() {
 		arglessInstr("ret");
 	}
 	
 	public void comment(String line) {
-		if(!line.contains("\n")) txt.append("\t# ").append(line).append('\n');
+		if(!line.contains("\n")) txt.append("\t\t# ").append(line).append('\n');
 	}
 	
 	public ASMData registerString(String str) {

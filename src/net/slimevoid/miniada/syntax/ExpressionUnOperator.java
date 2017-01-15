@@ -62,9 +62,12 @@ public class ExpressionUnOperator extends Expression {
 		switch(op.type) {
 		case MINUS:
 			asm.neg(r);
+			asm.arglessInstr("movslq %"+r.regName("l")+", %"+r.regName("")); //TODO rm ?
+			break;
 		case NOT:
 			asm.test(r, r);
 			asm.set("z", r);
+			break;
 		default: break;
 		}
 		asm.push(r);

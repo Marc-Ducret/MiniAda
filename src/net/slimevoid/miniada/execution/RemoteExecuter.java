@@ -16,7 +16,6 @@ public class RemoteExecuter extends Executer {
 	private final DataInputStream in;
 	
 	public RemoteExecuter(String ip, int port) throws IOException {
-		System.out.println("Trying to connect to "+ip+":"+port);
 		sok = new Socket(ip, port);
 		out = new DataOutputStream(
 				new BufferedOutputStream(sok.getOutputStream()));
@@ -27,15 +26,24 @@ public class RemoteExecuter extends Executer {
 	@Override
 	public String execute(String asm) throws ExecutionException {
 		try {
-			out.writeUTF(asm);
+			out.writeInt(asm.length());
+			out.writeBytes(asm);
 			out.flush();
 			boolean success = in.readBoolean();
-			String res = in.readUTF();
+			int resSize = in.readInt();
+			byte[] b = new byte[resSize];
+			int read = 0;
+			while(read < resSize) {
+				int r =in.read(b, read, resSize-read);
+				if(r < 0) throw new ExecutionException("Incomplete message");
+				read += r;
+			}
+			String res = new String(b);
 			sok.close();
 			if(success) return res;
 			else	 	throw new ExecutionException(res);
 		} catch (IOException e) {
-			throw new ExecutionException("Connection aborted");
+			throw new ExecutionException("Connection aborted: "+e+" : "+e.getMessage());
 		}
 	}
 

@@ -78,8 +78,9 @@ public class InstructionFor extends Instruction {
 	}
 
 	@Override
-	public void typeCheck(Environment env) throws TypeException {//TODO check is changes altered typing
+	public void typeCheck(Environment env) throws TypeException {//TODO check if changes altered typing
 		localEnv = new SubEnvironment(env, env.expectedReturn);
+		localEnv.returnLoc = env.returnLoc;
 		Type t = from.getType(env);
 		if(!t.canBeCastedInto(TypePrimitive.INTEGER))
 			throw new TypeException(from, 

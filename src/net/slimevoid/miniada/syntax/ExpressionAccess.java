@@ -3,8 +3,8 @@ package net.slimevoid.miniada.syntax;
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
-import net.slimevoid.miniada.execution.ASMConst;
 import net.slimevoid.miniada.execution.ASMBuilder.Register;
+import net.slimevoid.miniada.execution.ASMConst;
 import net.slimevoid.miniada.execution.ASMMem;
 import net.slimevoid.miniada.execution.ASMVar;
 import net.slimevoid.miniada.interpert.Scope;
@@ -91,11 +91,19 @@ public class ExpressionAccess extends Expression {
 				}
 			}
 		} else {
-			assert(access.func == null);
-			ASMVar from = new ASMVar(access.id, env);
-			for(int i = 0; i < this.getComputedType().size()/Compiler.WORD; i ++) {
-				asm.push(from);
-				from.offset(Compiler.WORD);
+			if(access.func == null) {
+				ASMVar from = new ASMVar(access.id, env);
+				for(int i = 0; i < this.getComputedType().size()/Compiler.WORD; i ++) {
+					asm.push(from);
+					from.offset(Compiler.WORD);
+				}
+			} else {
+				asm.sub(new ASMConst(access.func.retType.size()), Register.RSP);
+				asm.push(Register.RBP);
+				asm.mov(Register.RSP, Register.RBP);
+				asm.call(access.func.getLabel(asm));
+				asm.pop(Register.RBP);
+				asm.planBuild(access.func);
 			}
 		}
 	}

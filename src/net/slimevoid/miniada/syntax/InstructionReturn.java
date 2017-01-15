@@ -3,6 +3,9 @@ package net.slimevoid.miniada.syntax;
 import net.slimevoid.miniada.Compiler;
 import net.slimevoid.miniada.TokenList;
 import net.slimevoid.miniada.execution.ASMBuilder;
+import net.slimevoid.miniada.execution.ASMConst;
+import net.slimevoid.miniada.execution.ASMMem;
+import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.token.Keyword;
 import net.slimevoid.miniada.token.Keyword.KeywordType;
@@ -70,7 +73,17 @@ public class InstructionReturn extends Instruction {
 
 	@Override
 	public void buildAsm(ASMBuilder asm, Environment env) {
-		ret.buildAsm(asm, env);
-		asm.pop(env.returnLoc);
+		if(ret != null) {
+			ret.buildAsm(asm, env);
+			ASMMem mem = new ASMMem(env.returnLoc);
+			int size = ret.getComputedType().size();
+			mem.offset(size);
+			for(int i = 0; i < size/Compiler.WORD; i++) {
+				mem.offset(-Compiler.WORD);
+				asm.pop(mem);
+			}
+		}
+		asm.add(new ASMConst(env.getOffset()-Compiler.WORD*2), Register.RSP);
+		asm.ret();
 	}
 }

@@ -5,7 +5,6 @@ import net.slimevoid.miniada.execution.ASMBuilder.Register;
 import net.slimevoid.miniada.execution.ASMConst;
 import net.slimevoid.miniada.execution.ASMData;
 import net.slimevoid.miniada.execution.ASMMem;
-import net.slimevoid.miniada.execution.ASMVar;
 import net.slimevoid.miniada.interpert.Scope;
 import net.slimevoid.miniada.interpert.Value;
 import net.slimevoid.miniada.interpert.ValuePrimitive;
@@ -15,9 +14,15 @@ import net.slimevoid.miniada.typing.TypePrimitive;
 
 public class Library {
 	
-	public static final NativeProcedure PUT = buildPut();
-	public static final NativeProcedure NEW_LINE = buildNewLine();
-	public static final NativeFunction CHARACTER_VAL = buildCharVal();
+	public static NativeProcedure PUT;
+	public static NativeProcedure NEW_LINE;
+	public static NativeFunction CHARACTER_VAL;
+	
+	public static void initNatives() {
+		PUT = buildPut();
+		NEW_LINE = buildNewLine();
+		CHARACTER_VAL = buildCharVal();
+	}
 	
 	private static NativeProcedure buildPut() {
 		NativeProcedure put = new NativeProcedure("Put", 
@@ -30,7 +35,7 @@ public class Library {
 			@Override
 			public void buildASM(ASMBuilder asm) {
 				asm.label(getLabel(asm));
-				asm.mov(new ASMVar(-Compiler.WORD, 0), Register.RSI);
+				asm.mov(new ASMMem(-Compiler.WORD, Register.RBP), Register.RSI);
 				ASMData msg = asm.registerString("%c");
 				asm.mov(msg, Register.RDI);
 				asm.mov(new ASMConst(0), Register.RAX);
@@ -75,7 +80,7 @@ public class Library {
 			public void buildASM(ASMBuilder asm) {
 				asm.label(getLabel(asm));
 				Register r = asm.getTmpReg();
-				asm.mov(new ASMVar(-Compiler.WORD, 0), r);
+				asm.mov(new ASMMem(-Compiler.WORD, Register.RBP), r);
 				asm.mov(r, new ASMMem(-2*Compiler.WORD, Register.RBP));
 				asm.freeTempRegister(r);
 				asm.ret();

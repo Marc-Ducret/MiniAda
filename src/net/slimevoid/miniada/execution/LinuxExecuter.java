@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.nio.file.Files;
+import java.util.Random;
 
 public class LinuxExecuter extends Executer {
 	
@@ -14,10 +15,13 @@ public class LinuxExecuter extends Executer {
 	
 	public LinuxExecuter(File temp) {
 		this.temp = temp;
+		temp.mkdir();
 	}
 
 	@Override
 	public String execute(String asm) throws ExecutionException {
+//		Random rand = new Random();
+//		File temp = new File(this.temp.getParent(), ".tmp_"+rand.nextInt(0xFFFFFF));
 		temp.mkdir();
 		File s = new File(temp, "asm.s");
 		File o = new File(temp, "asm.o");
@@ -30,16 +34,31 @@ public class LinuxExecuter extends Executer {
 			Process  as = Runtime.getRuntime().exec(
 							"as "+temp.getName()+"/"+s.getName()
 							+" -o "+temp.getName()+"/"+o.getName());
-			if(as.waitFor() != 0) 
-				throw new ExecutionException("Assembly failed ");
+			if(as.waitFor() != 0) {
+				BufferedReader r = new BufferedReader(
+						new InputStreamReader(as.getErrorStream()));
+				String ln;
+				String res = "";
+				while((ln = r.readLine()) != null) res += ln+"\n";
+				throw new ExecutionException("Assembly failed "+res);
+			}
 			Process gcc = Runtime.getRuntime().exec(
 					"gcc "+temp.getName()+"/"+o.getName()
 					+" -o "+temp.getName()+"/"+exe.getName());
-			if(gcc.waitFor() != 0)
-				throw new ExecutionException("GCC failed");
+			if(gcc.waitFor() != 0) {
+				BufferedReader r = new BufferedReader(
+						new InputStreamReader(gcc.getErrorStream()));
+				String ln;
+				String res = "";
+				while((ln = r.readLine()) != null) res += ln+"\n";
+				throw new ExecutionException("GCC failed "+res);
+			}
 			Process p = Runtime.getRuntime().exec("./"+temp.getName()+"/"+exe.getName());
 			BufferedReader r = new BufferedReader(
 					new InputStreamReader(p.getInputStream()));
+			int code = p.waitFor();
+			if(code != 0)
+				throw new ExecutionException("Segmentation fault? exit code: "+code);
 			String ln;
 			String res = "";
 			while((ln = r.readLine()) != null) res += ln+"\n";
